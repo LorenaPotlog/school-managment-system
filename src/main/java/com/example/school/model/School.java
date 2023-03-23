@@ -1,5 +1,6 @@
 package com.example.school.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,16 +24,14 @@ public class School {
 
     private String schoolName;
     private String address;
-    @OneToMany(mappedBy = "school") //done by the school in student
-    private Set<Student> students = new HashSet<>();
+
     @ManyToMany(mappedBy = "schools")
     private Set<Teacher> teachers = new HashSet<>();
 
     @OneToMany(mappedBy = "school")
-//    @JoinColumn(name = "group_from_school")
+    @JsonIgnore
     private Set<Group> groups = new HashSet<>();
 
     public School() {
-
     }
 }

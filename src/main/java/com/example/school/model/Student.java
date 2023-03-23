@@ -23,11 +23,10 @@ public class Student {
     private String firstName;
     private String lastName;
     @ManyToOne
-    @JoinColumn(name="student_school") //referencedColumnName = "schoolId") //student table will have a school_id column (foreign
     private School school;
 
     @ManyToOne
-    @JoinColumn(name="student_group") //referencedColumnName = "groupId") //student table will have a school_id column (foreign
+    @JoinColumn(name = "student_group")
     private Group group;
 
     public Student() {

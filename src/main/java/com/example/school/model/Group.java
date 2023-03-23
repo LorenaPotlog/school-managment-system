@@ -1,17 +1,14 @@
 package com.example.school.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-
-import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
-
-//try with composite primary key
 @Entity
 @Getter
 @Setter
@@ -25,25 +22,18 @@ public class Group {
     private Long groupId;
 
     private String groupName;
-    private int groupSize; //no of students enrolled
+    private int groupSize; //max. no of students that can be enrolled
     @OneToMany(mappedBy = "group")
+    @JsonIgnore
     private Set<Student> students = new HashSet<>();
     @ManyToMany(mappedBy = "groups")
+    @JsonIgnore
     private Set<Teacher> teachers = new HashSet<>();
-   @ManyToOne
-   @JoinColumn(name = "group_school") //referencedColumnName = "schoolId")
-   @JsonIgnore
-   private School school;
+    @ManyToOne
+    @JoinColumn(name = "group_school")
+    private School school;
 
     public Group() {
-
     }
 
-    public Long getGroupId() {
-        return groupId;
-    }
-
-    public void setGroupId(Long groupId) {
-        this.groupId = groupId;
-    }
 }
