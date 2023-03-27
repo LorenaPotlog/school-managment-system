@@ -17,7 +17,6 @@ import java.util.List;
 public class SchoolController {
     @Autowired
     private SchoolRepository schoolRepository;
-    private StudentRepository studentRepository;
 
     /** returns all schools **/
     @GetMapping("schools")

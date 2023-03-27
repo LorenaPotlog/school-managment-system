@@ -7,7 +7,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -30,7 +32,7 @@ public class School {
 
     @OneToMany(mappedBy = "school")
     @JsonIgnore
-    private Set<Group> groups = new HashSet<>();
+    private List<Group> groups = new ArrayList<>();
 
     public School() {
     }

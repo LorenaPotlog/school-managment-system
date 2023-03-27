@@ -1,10 +1,7 @@
 package com.example.school.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 
 @Entity
@@ -12,9 +9,9 @@ import lombok.Setter;
 @Setter
 @Builder
 @AllArgsConstructor
-
+@EqualsAndHashCode
 @Table(name = "student")
-public class Student {
+public class Student extends Object {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

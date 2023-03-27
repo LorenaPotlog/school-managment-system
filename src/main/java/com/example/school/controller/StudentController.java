@@ -92,7 +92,6 @@ public class StudentController {
                 .orElseThrow(() -> new NotFoundException("Student not found"));
         School newSchool = schoolRepository.findById(schoolId)
                 .orElseThrow(() -> new NotFoundException("School not found"));
-        transferredStudent.setGroup(null);
         transferredStudent.setSchool(newSchool);
 
         Group updatedGroup = groupRepository.findByGroupName(groupName)
@@ -100,7 +99,7 @@ public class StudentController {
         if (updatedGroup.getSchool() == newSchool) {
             transferredStudent.setGroup(updatedGroup);
         } else {
-            throw new RuntimeException("Group not found in new school");
+            transferredStudent.setGroup(null);
         }
 
         return studentRepository.save(transferredStudent);

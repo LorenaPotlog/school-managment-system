@@ -7,7 +7,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 @Entity
 @Getter
@@ -25,7 +27,7 @@ public class Group {
     private int groupSize; //max. no of students that can be enrolled
     @OneToMany(mappedBy = "group")
     @JsonIgnore
-    private Set<Student> students = new HashSet<>();
+    private List<Student> students = new ArrayList<>();
     @ManyToMany(mappedBy = "groups")
     @JsonIgnore
     private Set<Teacher> teachers = new HashSet<>();
