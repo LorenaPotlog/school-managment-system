@@ -1,13 +1,13 @@
 package com.example.school.model;
 
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.HashSet;
-import java.util.Set;
+import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -19,20 +19,21 @@ public class Teacher {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long teacherId;
-    private String firstName;
+    private String firstName; //@JoinColumn(name="school_id", referencedColumnName = "schoolId"
     private String lastName;
     @ManyToMany
-    @JoinTable(name = "teacher_school",
-            joinColumns = @JoinColumn(name = "teacher_id", referencedColumnName = "teacherId"),
-            inverseJoinColumns = @JoinColumn(name = "school_id", referencedColumnName = "schoolId"))
-    private Set<School> schools = new HashSet<>();
+    @JoinTable(name="teacher_school",
+            joinColumns = @JoinColumn(name="teacher_id",referencedColumnName = "teacherId"),
+            inverseJoinColumns = @JoinColumn(name="school_id",referencedColumnName = "schoolId"))
+    private List<School> schools = new ArrayList<>();
 
     @ManyToMany
     @JoinTable(name = "teacher_group",
-            joinColumns = @JoinColumn(name = "teacher_id", referencedColumnName = "teacherId"),
-            inverseJoinColumns = @JoinColumn(name = "group_id", referencedColumnName = "groupId"))
-    private Set<Group> groups = new HashSet<>();
+            joinColumns = @JoinColumn(name = "teacher_id",referencedColumnName = "teacherId"),
+            inverseJoinColumns = @JoinColumn(name = "group_id",referencedColumnName = "groupId"))
+    private List<Group> groups = new ArrayList<>();
 
     public Teacher() {
+
     }
 }

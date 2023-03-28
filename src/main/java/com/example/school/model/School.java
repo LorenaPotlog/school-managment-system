@@ -8,16 +8,13 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
-
 @Table(name = "school")
 public class School {
     @Id
@@ -28,7 +25,7 @@ public class School {
     private String address;
 
     @ManyToMany(mappedBy = "schools")
-    private Set<Teacher> teachers = new HashSet<>();
+    private List<Teacher> teachers = new ArrayList<>();
 
     @OneToMany(mappedBy = "school")
     @JsonIgnore

@@ -57,10 +57,8 @@ public class StudentController {
      **/
     @PutMapping("updateClass")
     public Student updateStudentByClass(@RequestParam("id") Long studentId, @RequestParam("classId") Long groupId) {
-        Student existingStudent = studentRepository.findById(studentId)
-                .orElseThrow(() -> new NotFoundException("Student not found"));
-        Group updatedGroup = groupRepository.findById(groupId)
-                .orElseThrow(() -> new NotFoundException("Group not found"));
+        Student existingStudent = studentRepository.findById(studentId).orElseThrow(() -> new NotFoundException("Student not found"));
+        Group updatedGroup = groupRepository.findById(groupId).orElseThrow(() -> new NotFoundException("Group not found"));
         existingStudent.setGroup(updatedGroup);
 
         return studentRepository.save(existingStudent);
@@ -73,10 +71,8 @@ public class StudentController {
      **/
     @PutMapping("changeSchool")
     public Student transferStudent(@RequestParam("id") Long studentId, @RequestParam("schoolId") Long schoolId) {
-        Student transferredStudent = studentRepository.findById(studentId)
-                .orElseThrow(() -> new NotFoundException("Student not found"));
-        School newSchool = schoolRepository.findById(schoolId)
-                .orElseThrow(() -> new NotFoundException("School not found"));
+        Student transferredStudent = studentRepository.findById(studentId).orElseThrow(() -> new NotFoundException("Student not found"));
+        School newSchool = schoolRepository.findById(schoolId).orElseThrow(() -> new NotFoundException("School not found"));
         transferredStudent.setGroup(null);
         transferredStudent.setSchool(newSchool);
         return studentRepository.save(transferredStudent);
@@ -88,14 +84,11 @@ public class StudentController {
      **/
     @PutMapping("transferAndEnrollInClass/{classname}")
     public Student transferStudentAndEnroll(@RequestParam("id") Long studentId, @RequestParam("schoolId") Long schoolId, @PathVariable("classname") String groupName) {
-        Student transferredStudent = studentRepository.findById(studentId)
-                .orElseThrow(() -> new NotFoundException("Student not found"));
-        School newSchool = schoolRepository.findById(schoolId)
-                .orElseThrow(() -> new NotFoundException("School not found"));
+        Student transferredStudent = studentRepository.findById(studentId).orElseThrow(() -> new NotFoundException("Student not found"));
+        School newSchool = schoolRepository.findById(schoolId).orElseThrow(() -> new NotFoundException("School not found"));
         transferredStudent.setSchool(newSchool);
 
-        Group updatedGroup = groupRepository.findByGroupName(groupName)
-                .orElseThrow(() -> new NotFoundException("Class not found"));
+        Group updatedGroup = groupRepository.findByGroupName(groupName).orElseThrow(() -> new NotFoundException("Class not found"));
         if (updatedGroup.getSchool() == newSchool) {
             transferredStudent.setGroup(updatedGroup);
         } else {

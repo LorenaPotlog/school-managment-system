@@ -50,7 +50,7 @@ class SchoolControllerTest {
     }
 
     @Test
-    void shouldReturnAllSchools() throws Exception {
+    void shouldReturnAllSchools() {
 
         List<School> schools = new ArrayList<>();
         schools.add(school1);
@@ -61,7 +61,7 @@ class SchoolControllerTest {
     }
 
     @Test
-    void shouldReturnAllClassesFromGivenSchool() throws Exception {
+    void shouldReturnAllClassesFromGivenSchool() {
         when(schoolRepository.findBySchoolName("A")).thenReturn(Optional.ofNullable(school1));
         List<Group> actualGroups = schoolController.getClassesFromSchool("A");
         assertEquals(actualGroups, groups);

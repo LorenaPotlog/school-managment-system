@@ -9,10 +9,7 @@ import com.example.school.repository.StudentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.webjars.NotFoundException;
@@ -22,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -55,7 +53,7 @@ class StudentControllerTest {
     }
 
     @Test
-    void shouldReturnAllStudents() throws Exception {
+    void shouldReturnAllStudents() {
 
         List<Student> students = new ArrayList<>();
         students.add(student1);
@@ -63,12 +61,18 @@ class StudentControllerTest {
 
         when(studentRepository.findAll()).thenReturn(students);
         assertEquals(2, studentController.getStudents().size());
+        verify(studentRepository).findAll();
     }
 
     @Test
-    void shouldAddNewStudent() throws Exception {
+    void shouldAddNewStudent() {
         studentController.addNewStudent("Bianca", "Ionescu");
-        Mockito.verify(studentRepository).save(student1);
+
+        ArgumentCaptor<Student> studentArgumentCaptor = ArgumentCaptor.forClass(Student.class);
+        verify(studentRepository).save(studentArgumentCaptor.capture());
+        Student capturedStudent = studentArgumentCaptor.getValue();
+        assertEquals(student1, capturedStudent);
+
     }
 
     @Test
@@ -90,7 +94,7 @@ class StudentControllerTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenStudentNotFound() throws Exception {
+    void shouldThrowExceptionWhenStudentNotFound() {
         when(groupRepository.findById(1L)).thenReturn(Optional.ofNullable(group));
         Exception exception = assertThrows(NotFoundException.class, () -> {
             studentController.updateStudentByClass(2L, 1L);
