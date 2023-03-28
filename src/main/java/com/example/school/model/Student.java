@@ -1,10 +1,7 @@
 package com.example.school.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 
 @Entity
@@ -12,9 +9,9 @@ import lombok.Setter;
 @Setter
 @Builder
 @AllArgsConstructor
-
+@EqualsAndHashCode
 @Table(name = "student")
-public class Student {
+public class Student extends Object {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,11 +20,10 @@ public class Student {
     private String firstName;
     private String lastName;
     @ManyToOne
-    @JoinColumn(name="student_school") //referencedColumnName = "schoolId") //student table will have a school_id column (foreign
     private School school;
 
     @ManyToOne
-    @JoinColumn(name="student_group") //referencedColumnName = "groupId") //student table will have a school_id column (foreign
+    @JoinColumn(name = "student_group")
     private Group group;
 
     public Student() {
