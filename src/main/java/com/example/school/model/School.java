@@ -1,11 +1,7 @@
 package com.example.school.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,22 +11,19 @@ import java.util.List;
 @Setter
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "school")
 public class School {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long schoolId;
-
     private String schoolName;
-    private String address;
+    private String schoolAddress;
 
     @ManyToMany(mappedBy = "schools")
     private List<Teacher> teachers = new ArrayList<>();
 
     @OneToMany(mappedBy = "school")
-    @JsonIgnore
     private List<Group> groups = new ArrayList<>();
 
-    public School() {
-    }
 }

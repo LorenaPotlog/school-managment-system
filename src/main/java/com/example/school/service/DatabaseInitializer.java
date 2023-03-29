@@ -29,9 +29,9 @@ public class DatabaseInitializer {
 
     //    @PostConstruct
     public void init() {
-        School school1 = School.builder().schoolName("Sf Nicolae").address("Decebal 23A").build();
+        School school1 = School.builder().schoolName("Sf Nicolae").schoolAddress("Decebal 23A").build();
 
-        School school2 = School.builder().schoolName("Petru Rares").address("Sfintilor 120B").build();
+        School school2 = School.builder().schoolName("Petru Rares").schoolAddress("Sfintilor 120B").build();
 
         schoolRepository.save(school1);
         schoolRepository.save(school2);

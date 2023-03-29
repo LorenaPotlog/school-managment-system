@@ -9,9 +9,10 @@ import lombok.*;
 @Setter
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 @EqualsAndHashCode
 @Table(name = "student")
-public class Student extends Object {
+public class Student {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,7 +27,4 @@ public class Student extends Object {
     @JoinColumn(name = "student_group")
     private Group group;
 
-    public Student() {
-
-    }
 }
