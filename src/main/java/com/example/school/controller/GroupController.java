@@ -30,7 +30,7 @@ public class GroupController {
     public ResponseEntity<String> deleteStudent(@RequestParam("className") String className, @RequestParam("id") Long studentId) {
         try {
             groupService.deleteStudent(className, studentId);
-            return new ResponseEntity<>("Successfully deleted student.", HttpStatus.OK);
+            return new ResponseEntity<>("Student was successfully deleted.", HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }

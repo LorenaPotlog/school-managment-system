@@ -3,13 +3,14 @@ package com.example.school.controller;
 import com.example.school.SchoolApplication;
 import com.example.school.model.Teacher;
 import com.example.school.repository.TeacherRepository;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -23,14 +24,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = SchoolApplication.class)
 @AutoConfigureMockMvc
 @RunWith(SpringRunner.class)
-public class TeacherControllerTest {
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+class TeacherControllerTest {
 
     @Autowired
     private MockMvc mvc;
     @Autowired
     private TeacherRepository teacherRepository;
 
-    @Before
+    @BeforeEach
     public void setUp() {
 
         Teacher teacher1 = Teacher.builder()
@@ -45,8 +47,9 @@ public class TeacherControllerTest {
         teacherRepository.saveAll(Arrays.asList(teacher1, teacher2));
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
+
         teacherRepository.deleteAll();
     }
 

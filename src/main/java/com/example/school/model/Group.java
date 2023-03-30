@@ -21,11 +21,11 @@ public class Group {
 
     private String groupName;
     private int groupSize;
-    @OneToMany(mappedBy = "group")
+    @OneToMany(mappedBy = "group", cascade = CascadeType.MERGE)
     private List<Student> students = new ArrayList<>();
     @ManyToMany(mappedBy = "groups")
     private List<Teacher> teachers = new ArrayList<>();
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_school")
     private School school;
 

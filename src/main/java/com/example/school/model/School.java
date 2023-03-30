@@ -23,7 +23,23 @@ public class School {
     @ManyToMany(mappedBy = "schools")
     private List<Teacher> teachers = new ArrayList<>();
 
-    @OneToMany(mappedBy = "school")
+    @OneToMany(
+            mappedBy = "school",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
     private List<Group> groups = new ArrayList<>();
+
+    public void addGroup(Group group) {
+        if (groups == null) {
+            groups = new ArrayList<>();
+        }
+        groups.add(group);
+        group.setSchool(this);
+    }
+
+    public void removeGroup(Group group) {
+        groups.remove(group);
+        group.setSchool(null);
+    }
 
 }

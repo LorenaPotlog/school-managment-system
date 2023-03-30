@@ -20,10 +20,10 @@ public class Student {
     private Long studentId;
     private String firstName;
     private String lastName;
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.MERGE)
     private School school;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "student_group")
     private Group group;
 

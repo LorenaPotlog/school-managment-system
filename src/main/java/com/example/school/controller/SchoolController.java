@@ -26,7 +26,7 @@ public class SchoolController {
     /**
      * returnes all classes within a given school
      **/
-    @GetMapping("schools/{schoolName}/classes")
+    @GetMapping("{schoolName}/classes")
     public List<GroupDto> getClassesFromSchool(@PathVariable String schoolName) {
         return schoolService.getClasses(schoolName);
     }
