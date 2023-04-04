@@ -1,11 +1,15 @@
 package com.example.school.service;
 
+import com.example.school.dto.input.AddSchoolDto;
 import com.example.school.model.Group;
 import com.example.school.model.School;
+import com.example.school.model.Teacher;
 import com.example.school.repository.SchoolRepository;
+import com.example.school.repository.TeacherRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -17,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -26,8 +31,13 @@ class SchoolServiceTest {
     SchoolService schoolService = new SchoolService();
     @Mock
     private SchoolRepository schoolRepository;
+
+    @Mock
+    TeacherRepository teacherRepository;
     private School school1;
     private School school2;
+
+    private Teacher teacher1;
 
     @BeforeEach
     public void setUp() {
@@ -40,6 +50,10 @@ class SchoolServiceTest {
                 .schoolName("B")
                 .build();
 
+        teacher1 = Teacher.builder()
+                .firstName("Andrei")
+                .build();
+
         Group group1 = Group.builder()
                 .groupName("I-A")
                 .school(school1).build();
@@ -47,11 +61,31 @@ class SchoolServiceTest {
                 .groupName("II-A")
                 .school(school1).build();
 
+
         List<Group> groups = new ArrayList<>();
         groups.add(group1);
         groups.add(group2);
 
         school1.setGroups(groups);
+    }
+
+    @Test
+    void shouldAddNewSchool() {
+        AddSchoolDto addSchoolDto = AddSchoolDto.builder()
+                .schoolName("Sava")
+                .teacherIds(List.of(1L, 2L, 3L))
+                .build();
+
+        when(teacherRepository.findByTeacherId(1L)).thenReturn(Optional.of(teacher1));
+        schoolService.addSchool(addSchoolDto);
+
+        ArgumentCaptor<School> schoolArgumentCaptor = ArgumentCaptor.forClass(School.class);
+        verify(schoolRepository).save(schoolArgumentCaptor.capture());
+        School capturedSchool = schoolArgumentCaptor.getValue();
+
+        assertEquals("Sava", capturedSchool.getSchoolName());
+        assertEquals("Andrei", capturedSchool.getTeachers().get(0).getFirstName());
+
     }
 
     @Test
@@ -63,7 +97,7 @@ class SchoolServiceTest {
         when(schoolRepository.findAll()).thenReturn(schools);
 
         assertEquals(2, schoolService.getAll().size());
-        assertEquals("A", schoolService.getAll().get(0).getName());
+        assertEquals("A", schoolService.getAll().get(0).getSchoolName());
     }
 
     @Test
@@ -71,6 +105,7 @@ class SchoolServiceTest {
         when(schoolRepository.findBySchoolName("A")).thenReturn(Optional.of(school1));
 
         assertEquals(2, schoolService.getClasses("A").size());
-        assertEquals("II-A", schoolService.getClasses("A").get(1).getName());
+        assertEquals("II-A", schoolService.getClasses("A").get(1).getGroupName());
     }
+
 }

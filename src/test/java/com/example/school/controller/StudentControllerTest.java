@@ -1,12 +1,14 @@
 package com.example.school.controller;
 
 import com.example.school.SchoolApplication;
+import com.example.school.dto.input.AddStudentDto;
 import com.example.school.model.Group;
 import com.example.school.model.School;
 import com.example.school.model.Student;
 import com.example.school.repository.GroupRepository;
 import com.example.school.repository.SchoolRepository;
 import com.example.school.repository.StudentRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,6 +16,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -82,32 +85,38 @@ class StudentControllerTest {
 
     @Test
     void shouldAddNewStudent() throws Exception {
-        mvc.perform(post("/newStudent?firstname=Maria&lastname=Popa"))
+        AddStudentDto addStudentDto = AddStudentDto.builder()
+                .firstName("Bianca")
+                .lastName("Ionescu")
+                .build();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        mvc.perform(post("/student").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(addStudentDto)))
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.firstName").value("Maria"))
-                .andExpect(MockMvcResultMatchers.content().json("{\"id\":3,\"firstName\":\"Maria\",\"lastName\":\"Popa\",\"school\":null,\"group\":null}"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.firstName").value("Bianca"));
     }
 
     @Test
     void shouldChangeClass() throws Exception {
-        mvc.perform(put("/updateClass?id=2&classId=2"))
+        mvc.perform(patch("/students/2/class/2"))
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.group.name").value("II-A"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.group.groupName").value("II-A"));
     }
 
     @Test
     void shouldChangeSchool() throws Exception {
-        mvc.perform(put("/changeSchool?id=1&schoolId=2"))
+        mvc.perform(patch("/students/1/school/2"))
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.school.name").value("Petru"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.school.schoolName").value("Petru"));
     }
 
     @Test
     void shouldChangeSchoolAndClass() throws Exception {
-        mvc.perform(put("/transferAndEnrollInClass/II-A?id=2&schoolId=2"))
+        mvc.perform(patch("/students/2/school/2/class/II-A"))
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.group.name").value("II-A"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.school.name").value("Petru"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.group.groupName").value("II-A"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.school.schoolName").value("Petru"));
     }
 }
 

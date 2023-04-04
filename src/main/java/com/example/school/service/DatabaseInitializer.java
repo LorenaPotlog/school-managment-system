@@ -62,6 +62,8 @@ public class DatabaseInitializer {
         teacherRepository.save(teacher3);
         teacherRepository.save(teacher4);
 
+
+
         Student student1 = Student.builder().firstName("Mircea").lastName("Popa").group(group1).build();
 
         Student student2 = Student.builder().firstName("Andi").lastName("Mihai").group(group1).build();

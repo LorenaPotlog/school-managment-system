@@ -19,9 +19,10 @@ public class TeacherDto {
     private String lastName;
 
     private List<SchoolDto> schools = new ArrayList<>();
+
     private List<GroupDto> groups = new ArrayList<>();
 
-    public static TeacherDto ToTeacherDto(Teacher teacher) {
+    public static TeacherDto toTeacherDto(Teacher teacher) {
         if (teacher == null) {
             return null;
         }
@@ -32,20 +33,25 @@ public class TeacherDto {
                 .build();
 
         if (teacher.getGroups() != null) {
-            result.toBuilder()
-                    .groups(teacher.getGroups().stream()
+            result = result.withGroups(
+                    teacher.getGroups().stream()
                             .map(GroupDto::toGroupDto)
-                            .collect(Collectors.toList()))
-                    .build();
+                            .collect(Collectors.toList()));
         }
         if (teacher.getSchools() != null) {
-            result.toBuilder()
-                    .schools(teacher.getSchools().stream()
+            result = result.withSchools(
+                    teacher.getSchools().stream()
                             .map(SchoolDto::toSchoolDto)
-                            .collect(Collectors.toList()))
-                    .build();
+                            .collect(Collectors.toList()));
         }
         return result;
     }
 
+    public TeacherDto withSchools(List<SchoolDto> schools) {
+        return this.schools == schools ? this : new TeacherDto(this.id, this.firstName, this.lastName, schools, this.groups);
+    }
+
+    public TeacherDto withGroups(List<GroupDto> groups) {
+        return this.groups == groups ? this : new TeacherDto(this.id, this.firstName, this.lastName, this.schools, groups);
+    }
 }

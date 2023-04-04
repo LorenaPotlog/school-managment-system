@@ -1,10 +1,14 @@
 package com.example.school.controller;
 
 import com.example.school.SchoolApplication;
+import com.example.school.dto.input.AddGroupDto;
 import com.example.school.model.Group;
+import com.example.school.model.School;
 import com.example.school.model.Student;
 import com.example.school.repository.GroupRepository;
+import com.example.school.repository.SchoolRepository;
 import com.example.school.repository.StudentRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,6 +16,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -20,8 +25,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import java.util.Arrays;
 
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = SchoolApplication.class)
@@ -37,8 +41,15 @@ class GroupControllerTest {
     @Autowired
     private StudentRepository studentRepository;
 
+    @Autowired
+    private SchoolRepository schoolRepository;
+
     @BeforeEach
     public void setUp() {
+
+        School school1 = School.builder().schoolName("Petru").build();
+
+        schoolRepository.save(school1);
 
         Group group1 = Group.builder().groupName("I-A").build();
         Group group2 = Group.builder().groupName("II-A").build();
@@ -63,8 +74,23 @@ class GroupControllerTest {
     }
 
     @Test
+    public void shouldAddNewGroup() throws Exception {
+        AddGroupDto addGroupDto = AddGroupDto.builder()
+                .groupName("I-A")
+                .schoolName("Petru")
+                .build();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        mvc.perform(post("/class").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(addGroupDto)))
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.groupName").value("I-A"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.school.schoolName").value("Petru"));
+    }
+
+    @Test
     public void shouldReturnAllStudentsInClass() throws Exception {
-        mvc.perform(get("/class/I-A/students"))
+        mvc.perform(get("/classes/I-A/students"))
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$", hasSize(2)))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.[0].firstName").value("Bianca"))
@@ -73,7 +99,7 @@ class GroupControllerTest {
 
     @Test
     public void shouldReturnEmptyListWhenNoStudentsInClass() throws Exception {
-        mvc.perform(get("/class/II-A/students"))
+        mvc.perform(get("/classes/II-A/students"))
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.content().json("[]"));
 
@@ -81,14 +107,14 @@ class GroupControllerTest {
 
     @Test
     public void shouldDeleteStudentFromClass() throws Exception {
-        mvc.perform(delete("/deleteStudentFromClass?className=I-A&id=2"))
+        mvc.perform(delete("/classes/I-A/students/2"))
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$").value("Student was successfully deleted."));
     }
 
     @Test
     public void shouldReturnHttpErrorWhenStudentNotFound() throws Exception {
-        mvc.perform(delete("/deleteStudentFromClass?className=I-A&id=3"))
+        mvc.perform(delete("/classes/I-A/students/3"))
                 .andExpect(status().isNotFound())
                 .andExpect(MockMvcResultMatchers.jsonPath("$").value("Student not found"));
 

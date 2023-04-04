@@ -27,4 +27,5 @@ public class Student {
     @JoinColumn(name = "student_group")
     private Group group;
 
+
 }

@@ -29,4 +29,29 @@ public class Group {
     @JoinColumn(name = "group_school")
     private School school;
 
+    public void addTeacher(Teacher teacher) {
+        if (teachers == null) {
+            teachers = new ArrayList<>();
+        }
+        teachers.add(teacher);
+    }
+
+    public void removeTeacher(Teacher teacher) {
+        teachers.remove(teacher);
+        teacher.removeGroup(this);
+    }
+
+    public void addStudent(Student student) {
+        if (students == null) {
+            students = new ArrayList<>();
+        }
+        students.add(student);
+        student.setGroup(this);
+    }
+
+    public void removeStudent(Student student) {
+        students.remove(student);
+        student.setGroup(null);
+    }
+
 }

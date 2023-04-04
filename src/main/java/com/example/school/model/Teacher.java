@@ -25,10 +25,33 @@ public class Teacher {
             inverseJoinColumns = @JoinColumn(name = "school_id", referencedColumnName = "schoolId"))
     private List<School> schools = new ArrayList<>();
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "teacher_group",
             joinColumns = @JoinColumn(name = "teacher_id", referencedColumnName = "teacherId"),
             inverseJoinColumns = @JoinColumn(name = "group_id", referencedColumnName = "groupId"))
     private List<Group> groups = new ArrayList<>();
+
+    public void addGroup(Group group) {
+        if (groups == null) {
+            groups = new ArrayList<>();
+        }
+        groups.add(group);
+    }
+
+    public void removeGroup(Group group) {
+        groups.remove(group);
+        group.removeTeacher(this);
+    }
+
+    public void addSchool(School school) {
+        if (schools == null) {
+            schools = new ArrayList<>();
+        }
+        schools.add(school);
+    }
+
+    public void removeSchool(School school) {
+        schools.remove(school);
+    }
 
 }

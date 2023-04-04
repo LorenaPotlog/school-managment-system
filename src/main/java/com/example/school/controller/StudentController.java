@@ -1,57 +1,60 @@
 package com.example.school.controller;
 
 import com.example.school.dto.StudentDto;
+import com.example.school.dto.input.AddStudentDto;
 import com.example.school.service.StudentService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "students", description = "Operations on students")
 @RestController
 public class StudentController {
 
     @Autowired
     private StudentService studentService;
 
-    /**
-     * Returnes all students
-     **/
+    @Operation(summary = "List all students.")
+    @ApiResponse(responseCode = "200", description = "Found all students.")
     @GetMapping("students")
     public List<StudentDto> getStudents() {
         return studentService.getAll();
     }
 
-    /**
-     * Adds new student
-     **/
-    @PostMapping("newStudent") //Post
-    public StudentDto addNewStudent(@RequestParam("firstname") String firstName, @RequestParam("lastname") String lastName) {
-        return studentService.add(firstName, lastName);
+    @Operation(summary = "Add new student.")
+    @ApiResponse(responseCode = "200", description = "New student successfully added.")
+    @PostMapping("student")
+    public StudentDto addNewStudent(@RequestBody AddStudentDto addStudentDto) {
+        return studentService.addStudent(addStudentDto);
     }
 
-    /**
-     * Moves or enrolls student to a class (group)
-     **/
-    @PutMapping("updateClass")
-    public StudentDto updateStudentByClass(@RequestParam("id") Long studentId, @RequestParam("classId") Long groupId) {
+    @Operation(summary = "Add or change class.")
+    @ApiResponse(responseCode = "200", description = "Class was successfully changed.")
+    @ApiResponse(responseCode = "404", description = "Class/Student not found")
+    @PatchMapping("students/{id}/class/{class}")
+    public StudentDto updateClass(@Parameter(description = "Student Id") @PathVariable("id") Long studentId, @Parameter(description = "New class Id") @PathVariable("class") Long groupId) {
         return studentService.changeClass(studentId, groupId);
     }
 
-    /**
-     * Transfers student to a new school
-     * any transfer will set the class (group) field to null
-     **/
-    @PutMapping("changeSchool")
-    public StudentDto transferStudent(@RequestParam("id") Long studentId, @RequestParam("schoolId") Long schoolId) {
+    @Operation(summary = "Add or change school.")
+    @ApiResponse(responseCode = "200", description = "School was successfully changed.")
+    @ApiResponse(responseCode = "404", description = "School/Student not found")
+    @PatchMapping("students/{id}/school/{school}")
+    public StudentDto updateSchool(@Parameter(description = "Student Id") @PathVariable("id") Long studentId, @Parameter(description = "New school Id") @PathVariable("school") Long schoolId) {
         return studentService.changeSchool(studentId, schoolId);
     }
 
-    /**
-     * Transfers student to a new school and enroll in class (group)
-     **/
-    @PutMapping("transferAndEnrollInClass/{classname}")
-    public StudentDto transferStudentAndEnroll(@RequestParam("id") Long studentId, @RequestParam("schoolId") Long schoolId, @PathVariable("classname") String groupName) {
-        return studentService.transferAndEnroll(studentId, schoolId, groupName);
+    @Operation(summary = "Add or change school and class.")
+    @ApiResponse(responseCode = "200", description = "School and class was successfully changed.")
+    @ApiResponse(responseCode = "404", description = "School/Class/Student not found")
+    @PatchMapping("students/{id}/school/{school}/class/{class}")
+    public StudentDto updateSchoolAndClass(@Parameter(description = "Student Id") @PathVariable("id") Long studentId, @Parameter(description = "New school Id") @PathVariable("school") Long schoolId, @Parameter(description = "New class name") @PathVariable("class") String groupName) {
+        return studentService.changeSchoolAndClass(studentId, schoolId, groupName);
     }
 }
 

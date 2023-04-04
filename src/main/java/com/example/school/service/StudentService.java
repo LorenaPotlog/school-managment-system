@@ -1,6 +1,7 @@
 package com.example.school.service;
 
 import com.example.school.dto.StudentDto;
+import com.example.school.dto.input.AddStudentDto;
 import com.example.school.model.Group;
 import com.example.school.model.School;
 import com.example.school.model.Student;
@@ -13,6 +14,7 @@ import org.webjars.NotFoundException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class StudentService {
@@ -35,11 +37,18 @@ public class StudentService {
         return students;
     }
 
-    public StudentDto add(String firstName, String lastName) {
+    public StudentDto addStudent(AddStudentDto addStudentDto) {
         Student newStudent = Student.builder()
-                .firstName(firstName)
-                .lastName(lastName)
+                .firstName(addStudentDto.getFirstName())
+                .lastName(addStudentDto.getLastName())
                 .build();
+
+        Optional<Group> group = groupRepository.findByGroupName(addStudentDto.getGroupName());
+        Optional<School> school = schoolRepository.findBySchoolName(addStudentDto.getSchoolName());
+
+        group.ifPresent(newStudent::setGroup);
+
+        school.ifPresent(newStudent::setSchool);
 
         return StudentDto.toStudentDto(studentRepository.save(newStudent));
     }
@@ -49,7 +58,7 @@ public class StudentService {
                 .orElseThrow(() -> new NotFoundException("Student not found"));
 
         Group updatedGroup = groupRepository.findById(groupId)
-                .orElseThrow(() -> new NotFoundException("Group not found"));
+                .orElseThrow(() -> new NotFoundException("Class not found"));
 
         existingStudent.setGroup(updatedGroup);
 
@@ -70,7 +79,7 @@ public class StudentService {
         return StudentDto.toStudentDto(studentRepository.save(transferredStudent));
     }
 
-    public StudentDto transferAndEnroll(Long studentId, Long schoolId, String groupName) {
+    public StudentDto changeSchoolAndClass(Long studentId, Long schoolId, String groupName) {
         Student transferredStudent = studentRepository.findById(studentId)
                 .orElseThrow(() -> new NotFoundException("Student not found"));
 

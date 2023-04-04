@@ -1,13 +1,17 @@
 package com.example.school.service;
 
+import com.example.school.dto.input.AddGroupDto;
 import com.example.school.model.Group;
+import com.example.school.model.School;
 import com.example.school.model.Student;
 import com.example.school.repository.GroupRepository;
+import com.example.school.repository.SchoolRepository;
 import com.example.school.repository.StudentRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -18,6 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -32,10 +38,15 @@ class GroupServiceTest {
     @Mock
     StudentRepository studentRepository;
 
+    @Mock
+    SchoolRepository schoolRepository;
+
     private Group group;
     private Student student1;
     private Student student2;
     private Student student3;
+
+    private School school;
 
     @BeforeEach
     public void setUp() {
@@ -51,7 +62,28 @@ class GroupServiceTest {
         students.add(student1);
         students.add(student2);
 
+        school = School.builder().schoolName("Petru").build();
+
         group.setStudents(students);
+
+    }
+
+    @Test
+    void shouldAddNewGroup() {
+        AddGroupDto addGroupDto = AddGroupDto.builder()
+                .groupName("I-A")
+                .schoolName("Petru")
+                .build();
+
+        when(schoolRepository.findBySchoolName("Petru")).thenReturn(Optional.of(school));
+
+        groupService.addGroup(addGroupDto);
+
+        ArgumentCaptor<Group> groupArgumentCaptor = ArgumentCaptor.forClass(Group.class);
+        verify(groupRepository).save(groupArgumentCaptor.capture());
+        Group capturedGroup = groupArgumentCaptor.getValue();
+
+        assertEquals("I-A", capturedGroup.getGroupName());
 
     }
 

@@ -1,8 +1,12 @@
 package com.example.school.controller;
 
 import com.example.school.SchoolApplication;
+import com.example.school.dto.input.AddTeacherDto;
+import com.example.school.model.Group;
 import com.example.school.model.Teacher;
+import com.example.school.repository.GroupRepository;
 import com.example.school.repository.TeacherRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,15 +14,18 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = SchoolApplication.class)
@@ -31,6 +38,9 @@ class TeacherControllerTest {
     private MockMvc mvc;
     @Autowired
     private TeacherRepository teacherRepository;
+
+    @Autowired
+    private GroupRepository groupRepository;
 
     @BeforeEach
     public void setUp() {
@@ -45,6 +55,12 @@ class TeacherControllerTest {
                 .build();
 
         teacherRepository.saveAll(Arrays.asList(teacher1, teacher2));
+
+        Group group1 = Group.builder()
+                .groupName("1")
+                .build();
+
+        groupRepository.save(group1);
     }
 
     @AfterEach
@@ -60,5 +76,22 @@ class TeacherControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$", hasSize(2)))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.[0].firstName").value("Mihai"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.[1].firstName").value("Maria"));
+    }
+
+    @Test
+    public void shouldAddNewTeacher() throws Exception {
+        AddTeacherDto addTeacherDto = AddTeacherDto.builder()
+                .firstName("Mihai")
+                .lastName("Popa")
+                .groupNames(List.of("1", "2"))
+                .schoolNames(List.of("1", "2"))
+                .build();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        mvc.perform(post("/teacher").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(addTeacherDto)))
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.firstName").value("Mihai"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.groups.[0].groupName").value("1"));
     }
 }

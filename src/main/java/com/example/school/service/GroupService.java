@@ -1,9 +1,13 @@
 package com.example.school.service;
 
+import com.example.school.dto.GroupDto;
 import com.example.school.dto.StudentDto;
+import com.example.school.dto.input.AddGroupDto;
 import com.example.school.model.Group;
+import com.example.school.model.School;
 import com.example.school.model.Student;
 import com.example.school.repository.GroupRepository;
+import com.example.school.repository.SchoolRepository;
 import com.example.school.repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,6 +23,21 @@ public class GroupService {
     private GroupRepository groupRepository;
     @Autowired
     private StudentRepository studentRepository;
+
+    @Autowired
+    private SchoolRepository schoolRepository;
+
+    public GroupDto addGroup(AddGroupDto addGroupDto) {
+        Group newGroup = Group.builder()
+                .groupName(addGroupDto.getGroupName())
+                .build();
+
+        Optional<School> school = schoolRepository.findBySchoolName(addGroupDto.getSchoolName());
+
+        school.ifPresent(newGroup::setSchool);
+
+        return GroupDto.toGroupDto(groupRepository.save(newGroup));
+    }
 
     public List<StudentDto> getStudents(String className) {
         List<StudentDto> students = new ArrayList<>();

@@ -1,5 +1,6 @@
 package com.example.school.service;
 
+import com.example.school.dto.input.AddStudentDto;
 import com.example.school.model.Group;
 import com.example.school.model.School;
 import com.example.school.model.Student;
@@ -67,7 +68,12 @@ class StudentServiceTest {
 
     @Test
     void shouldAddNewStudent() {
-        studentService.add("Bianca", "Ionescu");
+        AddStudentDto addStudentDto = AddStudentDto.builder()
+                .firstName("Bianca")
+                .lastName("Ionescu")
+                .build();
+
+        studentService.addStudent(addStudentDto);
 
         ArgumentCaptor<Student> studentArgumentCaptor = ArgumentCaptor.forClass(Student.class);
         verify(studentRepository).save(studentArgumentCaptor.capture());
@@ -95,7 +101,7 @@ class StudentServiceTest {
             studentService.changeClass(1L, 2L);
         });
 
-        assertEquals(exception.getMessage(), "Group not found");
+        assertEquals(exception.getMessage(), "Class not found");
         assertNull(student2.getGroup());
     }
 
@@ -138,7 +144,7 @@ class StudentServiceTest {
         when(groupRepository.findByGroupName("I-A")).thenReturn(Optional.of(group));
         group.setSchool(school);
 
-        studentService.transferAndEnroll(1L, 1L, "I-A");
+        studentService.changeSchoolAndClass(1L, 1L, "I-A");
 
         Mockito.verify(studentRepository).save(student2);
 
@@ -150,7 +156,7 @@ class StudentServiceTest {
         when(schoolRepository.findById(1L)).thenReturn(Optional.of(school));
         when(groupRepository.findByGroupName("I-A")).thenReturn(Optional.of(group));
 
-        studentService.transferAndEnroll(1L, 1L, "I-A");
+        studentService.changeSchoolAndClass(1L, 1L, "I-A");
 
         assertNull(student2.getGroup());
 
