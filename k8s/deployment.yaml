@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: school-management-deployment
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: school-management
+    spec:
+      containers:
+        - name: school-management
+          image: docker.io/library/school:1.0
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+  selector:
+    matchLabels:
+      app: school-management
