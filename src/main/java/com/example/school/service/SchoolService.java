@@ -22,26 +22,22 @@ public class SchoolService {
 
     @Autowired
     private SchoolRepository schoolRepository;
-
     @Autowired
     private TeacherRepository teacherRepository;
 
     public SchoolDto addSchool(AddSchoolDto addSchoolDto) {
         School newSchool = School.builder()
-                .schoolName(addSchoolDto.getSchoolName())
+                .name(addSchoolDto.getSchoolName())
                 .build();
-
         for (int i = 0; i < addSchoolDto.getTeacherIds().size(); i++) {
-            Optional<Teacher> teacher = teacherRepository.findByTeacherId(addSchoolDto.getTeacherIds().get(i));
+            Optional<Teacher> teacher = teacherRepository.findById(addSchoolDto.getTeacherIds().get(i));
             teacher.ifPresent(value -> newSchool.addTeacher(teacher.get()));
         }
-
         return SchoolDto.toSchoolDto(schoolRepository.save(newSchool));
     }
 
     public List<SchoolDto> getAll() {
         List<SchoolDto> schools = new ArrayList<>();
-
         for (School school : schoolRepository.findAll()) {
             schools.add(SchoolDto.toSchoolDto(school));
         }
@@ -49,14 +45,11 @@ public class SchoolService {
     }
 
     public List<GroupDto> getClasses(String schoolName) {
-
-        if (schoolRepository.findBySchoolName(schoolName).isPresent()) {
-            List<Group> classes = schoolRepository.findBySchoolName(schoolName).get().getGroups();
+        if (schoolRepository.findByName(schoolName).isPresent()) {
+            List<Group> classes = schoolRepository.findByName(schoolName).get().getGroups();
             return classes.stream()
                     .map(GroupDto::toGroupDto)
                     .collect(Collectors.toList());
-
         } else throw new NotFoundException("School not found.");
     }
-
 }

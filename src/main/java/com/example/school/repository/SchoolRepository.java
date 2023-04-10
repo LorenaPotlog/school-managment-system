@@ -6,6 +6,6 @@ import org.springframework.data.repository.CrudRepository;
 import java.util.Optional;
 
 public interface SchoolRepository extends CrudRepository<School, Long> {
-    Optional<School> findBySchoolName(String schoolName);
+    Optional<School> findByName(String schoolName);
 
 }

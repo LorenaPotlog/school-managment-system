@@ -43,24 +43,18 @@ class StudentServiceTest {
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-
-        student1 = Student.builder().studentId(3L).firstName("Bianca").lastName("Ionescu").build();
-        student2 = Student.builder().studentId(1L).firstName("Ioana").lastName("Popescu").build();
-
-        group = Group.builder().groupId(1L).groupName("I-A").build();
-
-        school = School.builder().schoolId(1L).build();
+        student1 = Student.builder().id(3L).firstName("Bianca").lastName("Ionescu").build();
+        student2 = Student.builder().id(1L).firstName("Ioana").lastName("Popescu").build();
+        group = Group.builder().id(1L).name("I-A").build();
+        school = School.builder().id(1L).build();
     }
 
     @Test
     void shouldReturnAllStudents() {
-
         List<Student> students = new ArrayList<>();
         students.add(student1);
         students.add(student2);
-
         when(studentRepository.findAll()).thenReturn(students);
-
         assertFalse(studentService.getAll().isEmpty());
         assertEquals(2, studentService.getAll().size());
         assertEquals("Bianca", studentService.getAll().get(0).getFirstName());
@@ -72,35 +66,27 @@ class StudentServiceTest {
                 .firstName("Bianca")
                 .lastName("Ionescu")
                 .build();
-
         studentService.addStudent(addStudentDto);
-
         ArgumentCaptor<Student> studentArgumentCaptor = ArgumentCaptor.forClass(Student.class);
         verify(studentRepository).save(studentArgumentCaptor.capture());
         Student capturedStudent = studentArgumentCaptor.getValue();
-
         assertEquals("Bianca", capturedStudent.getFirstName());
-
     }
 
     @Test
     void shouldChangeClassInStudent() {
         when(studentRepository.findById(1L)).thenReturn(Optional.of(student2));
         when(groupRepository.findById(1L)).thenReturn(Optional.of(group));
-
         studentService.changeClass(1L, 1L);
-
         Mockito.verify(studentRepository).save(student2);
     }
 
     @Test
     void shouldThrowExceptionWhenGroupNotFound() {
         when(studentRepository.findById(1L)).thenReturn(Optional.of(student2));
-
         Exception exception = assertThrows(NotFoundException.class, () -> {
             studentService.changeClass(1L, 2L);
         });
-
         assertEquals(exception.getMessage(), "Class not found");
         assertNull(student2.getGroup());
     }
@@ -108,11 +94,9 @@ class StudentServiceTest {
     @Test
     void shouldThrowExceptionWhenStudentNotFound() {
         when(groupRepository.findById(1L)).thenReturn(Optional.of(group));
-
         Exception exception = assertThrows(NotFoundException.class, () -> {
             studentService.changeClass(2L, 1L);
         });
-
         assertEquals(exception.getMessage(), "Student not found");
     }
 
@@ -120,20 +104,16 @@ class StudentServiceTest {
     void shouldChangeSchoolInStudent() {
         when(studentRepository.findById(1L)).thenReturn(Optional.of(student2));
         when(schoolRepository.findById(1L)).thenReturn(Optional.of(school));
-
         studentService.changeSchool(1L, 1L);
-
         Mockito.verify(studentRepository).save(student2);
     }
 
     @Test
     void shouldThrowExceptionWhenSchoolNotFound() {
         when(studentRepository.findById(1L)).thenReturn(Optional.of(student2));
-
         Exception exception = assertThrows(NotFoundException.class, () -> {
             studentService.changeSchool(1L, 2L);
         });
-
         assertEquals(exception.getMessage(), "School not found");
     }
 
@@ -141,25 +121,18 @@ class StudentServiceTest {
     void shouldChangeSchoolAndGroupInStudent() {
         when(studentRepository.findById(1L)).thenReturn(Optional.of(student2));
         when(schoolRepository.findById(1L)).thenReturn(Optional.of(school));
-        when(groupRepository.findByGroupName("I-A")).thenReturn(Optional.of(group));
+        when(groupRepository.findByName("I-A")).thenReturn(Optional.of(group));
         group.setSchool(school);
-
         studentService.changeSchoolAndClass(1L, 1L, "I-A");
-
         Mockito.verify(studentRepository).save(student2);
-
     }
 
     @Test
     void shouldChangeSchoolAndSetGroupToNull() {
         when(studentRepository.findById(1L)).thenReturn(Optional.of(student2));
         when(schoolRepository.findById(1L)).thenReturn(Optional.of(school));
-        when(groupRepository.findByGroupName("I-A")).thenReturn(Optional.of(group));
-
+        when(groupRepository.findByName("I-A")).thenReturn(Optional.of(group));
         studentService.changeSchoolAndClass(1L, 1L, "I-A");
-
         assertNull(student2.getGroup());
-
     }
-
 }

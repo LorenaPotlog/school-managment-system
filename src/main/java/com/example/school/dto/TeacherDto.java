@@ -17,17 +17,16 @@ public class TeacherDto {
     private Long id;
     private String firstName;
     private String lastName;
-
     private List<SchoolDto> schools = new ArrayList<>();
-
     private List<GroupDto> groups = new ArrayList<>();
 
     public static TeacherDto toTeacherDto(Teacher teacher) {
         if (teacher == null) {
             return null;
         }
+
         TeacherDto result = TeacherDto.builder()
-                .id(teacher.getTeacherId())
+                .id(teacher.getId())
                 .firstName(teacher.getFirstName())
                 .lastName(teacher.getLastName())
                 .build();
@@ -38,6 +37,7 @@ public class TeacherDto {
                             .map(GroupDto::toGroupDto)
                             .collect(Collectors.toList()));
         }
+
         if (teacher.getSchools() != null) {
             result = result.withSchools(
                     teacher.getSchools().stream()

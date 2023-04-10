@@ -22,7 +22,7 @@ public class StudentDto {
             return null;
         }
         return StudentDto.builder()
-                .id(student.getStudentId())
+                .id(student.getId())
                 .firstName(student.getFirstName())
                 .lastName(student.getLastName())
                 .group(GroupDto.toGroupDto(student.getGroup()))

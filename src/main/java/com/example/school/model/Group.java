@@ -17,10 +17,9 @@ public class Group {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "groupId")
-    private Long groupId;
+    private Long id;
 
-    private String groupName;
-    private int groupSize;
+    private String name;
     @OneToMany(mappedBy = "group", cascade = CascadeType.MERGE)
     private List<Student> students = new ArrayList<>();
     @ManyToMany(mappedBy = "groups")
@@ -40,18 +39,4 @@ public class Group {
         teachers.remove(teacher);
         teacher.removeGroup(this);
     }
-
-    public void addStudent(Student student) {
-        if (students == null) {
-            students = new ArrayList<>();
-        }
-        students.add(student);
-        student.setGroup(this);
-    }
-
-    public void removeStudent(Student student) {
-        students.remove(student);
-        student.setGroup(null);
-    }
-
 }

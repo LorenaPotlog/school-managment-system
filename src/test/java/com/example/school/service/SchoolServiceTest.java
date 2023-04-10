@@ -31,41 +31,34 @@ class SchoolServiceTest {
     SchoolService schoolService = new SchoolService();
     @Mock
     private SchoolRepository schoolRepository;
-
     @Mock
     TeacherRepository teacherRepository;
+
     private School school1;
     private School school2;
-
     private Teacher teacher1;
 
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-
         school1 = School.builder()
-                .schoolName("A")
+                .name("A")
                 .build();
         school2 = School.builder()
-                .schoolName("B")
+                .name("B")
                 .build();
-
         teacher1 = Teacher.builder()
                 .firstName("Andrei")
                 .build();
-
         Group group1 = Group.builder()
-                .groupName("I-A")
+                .name("I-A")
                 .school(school1).build();
         Group group2 = Group.builder()
-                .groupName("II-A")
+                .name("II-A")
                 .school(school1).build();
-
-
         List<Group> groups = new ArrayList<>();
         groups.add(group1);
         groups.add(group2);
-
         school1.setGroups(groups);
     }
 
@@ -75,15 +68,12 @@ class SchoolServiceTest {
                 .schoolName("Sava")
                 .teacherIds(List.of(1L, 2L, 3L))
                 .build();
-
-        when(teacherRepository.findByTeacherId(1L)).thenReturn(Optional.of(teacher1));
+        when(teacherRepository.findById(1L)).thenReturn(Optional.of(teacher1));
         schoolService.addSchool(addSchoolDto);
-
         ArgumentCaptor<School> schoolArgumentCaptor = ArgumentCaptor.forClass(School.class);
         verify(schoolRepository).save(schoolArgumentCaptor.capture());
         School capturedSchool = schoolArgumentCaptor.getValue();
-
-        assertEquals("Sava", capturedSchool.getSchoolName());
+        assertEquals("Sava", capturedSchool.getName());
         assertEquals("Andrei", capturedSchool.getTeachers().get(0).getFirstName());
 
     }
@@ -93,19 +83,15 @@ class SchoolServiceTest {
         List<School> schools = new ArrayList<>();
         schools.add(school1);
         schools.add(school2);
-
         when(schoolRepository.findAll()).thenReturn(schools);
-
         assertEquals(2, schoolService.getAll().size());
-        assertEquals("A", schoolService.getAll().get(0).getSchoolName());
+        assertEquals("A", schoolService.getAll().get(0).getName());
     }
 
     @Test
     void shouldReturnAllClassesFromGivenSchool() {
-        when(schoolRepository.findBySchoolName("A")).thenReturn(Optional.of(school1));
-
+        when(schoolRepository.findByName("A")).thenReturn(Optional.of(school1));
         assertEquals(2, schoolService.getClasses("A").size());
-        assertEquals("II-A", schoolService.getClasses("A").get(1).getGroupName());
+        assertEquals("II-A", schoolService.getClasses("A").get(1).getName());
     }
-
 }

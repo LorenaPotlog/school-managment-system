@@ -17,7 +17,7 @@ public class Student {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "studentId")
-    private Long studentId;
+    private Long id;
     private String firstName;
     private String lastName;
     @ManyToOne(cascade = CascadeType.MERGE)

@@ -16,7 +16,8 @@ import java.util.List;
 public class Teacher {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long teacherId;
+    @Column(name="teacherId")
+    private Long id;
     private String firstName;
     private String lastName;
     @ManyToMany

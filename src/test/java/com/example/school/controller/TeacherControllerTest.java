@@ -38,13 +38,11 @@ class TeacherControllerTest {
     private MockMvc mvc;
     @Autowired
     private TeacherRepository teacherRepository;
-
     @Autowired
     private GroupRepository groupRepository;
 
     @BeforeEach
     public void setUp() {
-
         Teacher teacher1 = Teacher.builder()
                 .firstName("Mihai")
                 .lastName("Popa")
@@ -53,19 +51,15 @@ class TeacherControllerTest {
                 .firstName("Maria")
                 .lastName("Iorga")
                 .build();
-
         teacherRepository.saveAll(Arrays.asList(teacher1, teacher2));
-
         Group group1 = Group.builder()
-                .groupName("1")
+                .name("1")
                 .build();
-
         groupRepository.save(group1);
     }
 
     @AfterEach
     public void tearDown() {
-
         teacherRepository.deleteAll();
     }
 
@@ -86,12 +80,10 @@ class TeacherControllerTest {
                 .groupNames(List.of("1", "2"))
                 .schoolNames(List.of("1", "2"))
                 .build();
-
         ObjectMapper objectMapper = new ObjectMapper();
-
         mvc.perform(post("/teacher").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(addTeacherDto)))
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.firstName").value("Mihai"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.groups.[0].groupName").value("1"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.groups.[0].name").value("1"));
     }
 }

@@ -21,7 +21,6 @@ public class TeacherService {
 
     @Autowired
     private TeacherRepository teacherRepository;
-
     @Autowired
     private GroupRepository groupRepository;
     @Autowired
@@ -35,25 +34,20 @@ public class TeacherService {
         return teachers;
     }
 
-
     public TeacherDto addTeacher(AddTeacherDto addTeacherDto) {
         Teacher newTeacher = Teacher.builder()
                 .firstName(addTeacherDto.getFirstName())
                 .lastName(addTeacherDto.getLastName())
                 .build();
-
         for (int i = 0; i < addTeacherDto.getGroupNames().size(); i++) {
-            Optional<Group> group = groupRepository.findByGroupName(addTeacherDto.getGroupNames().get(i));
+            Optional<Group> group = groupRepository.findByName(addTeacherDto.getGroupNames().get(i));
             group.ifPresent(value -> newTeacher.addGroup(group.get()));
         }
-
         for (int i = 0; i < addTeacherDto.getGroupNames().size(); i++) {
-            Optional<School> school = schoolRepository.findBySchoolName(addTeacherDto.getSchoolNames().get(i));
+            Optional<School> school = schoolRepository.findByName(addTeacherDto.getSchoolNames().get(i));
             school.ifPresent(value -> newTeacher.addSchool(school.get()));
         }
-
         return TeacherDto.toTeacherDto(teacherRepository.save(newTeacher));
     }
-
 }
 

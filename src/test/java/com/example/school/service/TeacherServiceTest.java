@@ -32,10 +32,8 @@ class TeacherServiceTest {
     TeacherService teacherService = new TeacherService();
     @Mock
     private TeacherRepository teacherRepository;
-
     @Mock
     private SchoolRepository schoolRepository;
-
     @Mock
     private GroupRepository groupRepository;
 
@@ -48,19 +46,15 @@ class TeacherServiceTest {
         teachers.add(Teacher.builder()
                 .firstName("Ionel")
                 .build());
-
         when(teacherRepository.findAll()).thenReturn(teachers);
-
         assertFalse(teacherService.getAll().isEmpty());
         assertEquals(2, teacherService.getAll().size());
         assertEquals("Andreea", teacherService.getAll().get(0).getFirstName());
-
     }
 
     @Test
     void shouldReturnNoDataWhenNoTeachers() {
         when(teacherRepository.findAll()).thenReturn(new ArrayList<>());
-
         assertEquals(0, teacherService.getAll().size());
     }
 
@@ -72,20 +66,15 @@ class TeacherServiceTest {
                 .groupNames(List.of("1", "2"))
                 .schoolNames(List.of("1", "2"))
                 .build();
-
-        Group group1 = Group.builder().groupName("1").build();
-        School school1 = School.builder().schoolName("1").build();
-        when(groupRepository.findByGroupName("1")).thenReturn(Optional.of(group1));
-        when(schoolRepository.findBySchoolName("1")).thenReturn(Optional.of(school1));
+        Group group1 = Group.builder().name("1").build();
+        School school1 = School.builder().name("1").build();
+        when(groupRepository.findByName("1")).thenReturn(Optional.of(group1));
+        when(schoolRepository.findByName("1")).thenReturn(Optional.of(school1));
         teacherService.addTeacher(addTeacherDto);
-
         ArgumentCaptor<Teacher> teacherArgumentCaptor = ArgumentCaptor.forClass(Teacher.class);
         verify(teacherRepository).save(teacherArgumentCaptor.capture());
         Teacher capturedTeacher = teacherArgumentCaptor.getValue();
-
         assertEquals("Bianca", capturedTeacher.getFirstName());
-        assertEquals("1", capturedTeacher.getGroups().get(0).getGroupName());
-
+        assertEquals("1", capturedTeacher.getGroups().get(0).getName());
     }
-
 }

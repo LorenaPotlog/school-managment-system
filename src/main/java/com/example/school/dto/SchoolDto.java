@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 public class SchoolDto {
 
     private Long id;
-    private String schoolName;
+    private String name;
     @With
     private List<TeacherDto> teachers = new ArrayList<>();
 
@@ -26,8 +26,8 @@ public class SchoolDto {
         }
 
         SchoolDto result = SchoolDto.builder()
-                .id(school.getSchoolId())
-                .schoolName(school.getSchoolName())
+                .id(school.getId())
+                .name(school.getName())
                 .build();
         if (school.getTeachers() != null) {
             result = result.withTeachers(
@@ -36,6 +36,5 @@ public class SchoolDto {
                             .collect(Collectors.toList()));
         }
         return result;
-
     }
 }

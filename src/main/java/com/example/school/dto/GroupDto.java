@@ -12,7 +12,7 @@ import lombok.*;
 public class GroupDto {
 
     private Long id;
-    private String groupName;
+    private String name;
     private SchoolDto school;
 
     public static GroupDto toGroupDto(Group group) {
@@ -20,8 +20,8 @@ public class GroupDto {
             return null;
         }
         return GroupDto.builder()
-                .id(group.getGroupId())
-                .groupName(group.getGroupName())
+                .id(group.getId())
+                .name(group.getName())
                 .school(SchoolDto.toSchoolDto(group.getSchool()))
                 .build();
     }

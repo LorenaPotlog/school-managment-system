@@ -16,9 +16,9 @@ import java.util.List;
 public class School {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long schoolId;
-    private String schoolName;
-    private String schoolAddress;
+    @Column(name = "schoolId")
+    private Long id;
+    private String name;
 
     @ManyToMany(mappedBy = "schools")
     private List<Teacher> teachers = new ArrayList<>();

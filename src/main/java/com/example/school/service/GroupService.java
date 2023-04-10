@@ -23,33 +23,28 @@ public class GroupService {
     private GroupRepository groupRepository;
     @Autowired
     private StudentRepository studentRepository;
-
     @Autowired
     private SchoolRepository schoolRepository;
 
     public GroupDto addGroup(AddGroupDto addGroupDto) {
         Group newGroup = Group.builder()
-                .groupName(addGroupDto.getGroupName())
+                .name(addGroupDto.getGroupName())
                 .build();
-
-        Optional<School> school = schoolRepository.findBySchoolName(addGroupDto.getSchoolName());
-
+        Optional<School> school = schoolRepository.findByName(addGroupDto.getSchoolName());
         school.ifPresent(newGroup::setSchool);
-
         return GroupDto.toGroupDto(groupRepository.save(newGroup));
     }
 
     public List<StudentDto> getStudents(String className) {
         List<StudentDto> students = new ArrayList<>();
-
-        for (Student student : groupRepository.findByGroupName(className).get().getStudents()) {
+        for (Student student : groupRepository.findByName(className).get().getStudents()) {
             students.add(StudentDto.toStudentDto(student));
         }
         return students;
     }
 
     public void deleteStudent(String className, Long studentId) {
-        Optional<Group> currentClass = groupRepository.findByGroupName(className);
+        Optional<Group> currentClass = groupRepository.findByName(className);
         Optional<Student> existingStudent = studentRepository.findById(studentId);
         if (existingStudent.isEmpty()) {
             throw new IllegalArgumentException("Student not found");
