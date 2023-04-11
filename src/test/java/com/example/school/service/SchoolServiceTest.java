@@ -41,24 +41,17 @@ class SchoolServiceTest {
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-        school1 = School.builder()
-                .name("A")
-                .build();
-        school2 = School.builder()
-                .name("B")
-                .build();
-        teacher1 = Teacher.builder()
-                .firstName("Andrei")
-                .build();
-        Group group1 = Group.builder()
-                .name("I-A")
-                .school(school1).build();
-        Group group2 = Group.builder()
-                .name("II-A")
-                .school(school1).build();
+
+        school1 = School.builder().name("A").build();
+        school2 = School.builder().name("B").build();
+        teacher1 = Teacher.builder().firstName("Andrei").build();
+
+        Group group1 = Group.builder().name("I-A").school(school1).build();
+        Group group2 = Group.builder().name("II-A").school(school1).build();
         List<Group> groups = new ArrayList<>();
         groups.add(group1);
         groups.add(group2);
+
         school1.setGroups(groups);
     }
 
@@ -69,10 +62,13 @@ class SchoolServiceTest {
                 .teacherIds(List.of(1L, 2L, 3L))
                 .build();
         when(teacherRepository.findById(1L)).thenReturn(Optional.of(teacher1));
+
         schoolService.addSchool(addSchoolDto);
+
         ArgumentCaptor<School> schoolArgumentCaptor = ArgumentCaptor.forClass(School.class);
         verify(schoolRepository).save(schoolArgumentCaptor.capture());
         School capturedSchool = schoolArgumentCaptor.getValue();
+
         assertEquals("Sava", capturedSchool.getName());
         assertEquals("Andrei", capturedSchool.getTeachers().get(0).getFirstName());
 
@@ -84,6 +80,7 @@ class SchoolServiceTest {
         schools.add(school1);
         schools.add(school2);
         when(schoolRepository.findAll()).thenReturn(schools);
+
         assertEquals(2, schoolService.getAll().size());
         assertEquals("A", schoolService.getAll().get(0).getName());
     }
@@ -91,6 +88,7 @@ class SchoolServiceTest {
     @Test
     void shouldReturnAllClassesFromGivenSchool() {
         when(schoolRepository.findByName("A")).thenReturn(Optional.of(school1));
+
         assertEquals(2, schoolService.getClasses("A").size());
         assertEquals("II-A", schoolService.getClasses("A").get(1).getName());
     }

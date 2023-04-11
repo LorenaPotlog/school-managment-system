@@ -47,11 +47,15 @@ class GroupControllerTest {
     public void setUp() {
         School school1 = School.builder().name("Petru").build();
         schoolRepository.save(school1);
+
         Group group1 = Group.builder().name("I-A").build();
         Group group2 = Group.builder().name("II-A").build();
+
         Student student1 = Student.builder().firstName("Bianca").lastName("Ionescu").group(group1).build();
         Student student2 = Student.builder().firstName("Ioana").lastName("Popescu").group(group1).build();
+
         group1.setStudents(Arrays.asList(student1, student2));
+
         groupRepository.save(group1);
         groupRepository.save(group2);
         studentRepository.save(student1);
@@ -70,7 +74,9 @@ class GroupControllerTest {
                 .groupName("I-A")
                 .schoolName("Petru")
                 .build();
+
         ObjectMapper objectMapper = new ObjectMapper();
+
         mvc.perform(post("/class").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(addGroupDto)))
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("I-A"))

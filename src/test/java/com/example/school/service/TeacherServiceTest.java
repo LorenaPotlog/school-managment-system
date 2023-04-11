@@ -40,13 +40,10 @@ class TeacherServiceTest {
     @Test
     void shouldReturnAllTeachers() {
         List<Teacher> teachers = new ArrayList<>();
-        teachers.add(Teacher.builder()
-                .firstName("Andreea")
-                .build());
-        teachers.add(Teacher.builder()
-                .firstName("Ionel")
-                .build());
+        teachers.add(Teacher.builder().firstName("Andreea").build());
+        teachers.add(Teacher.builder().firstName("Ionel").build());
         when(teacherRepository.findAll()).thenReturn(teachers);
+
         assertFalse(teacherService.getAll().isEmpty());
         assertEquals(2, teacherService.getAll().size());
         assertEquals("Andreea", teacherService.getAll().get(0).getFirstName());
@@ -55,6 +52,7 @@ class TeacherServiceTest {
     @Test
     void shouldReturnNoDataWhenNoTeachers() {
         when(teacherRepository.findAll()).thenReturn(new ArrayList<>());
+
         assertEquals(0, teacherService.getAll().size());
     }
 
@@ -70,10 +68,13 @@ class TeacherServiceTest {
         School school1 = School.builder().name("1").build();
         when(groupRepository.findByName("1")).thenReturn(Optional.of(group1));
         when(schoolRepository.findByName("1")).thenReturn(Optional.of(school1));
+
         teacherService.addTeacher(addTeacherDto);
+
         ArgumentCaptor<Teacher> teacherArgumentCaptor = ArgumentCaptor.forClass(Teacher.class);
         verify(teacherRepository).save(teacherArgumentCaptor.capture());
         Teacher capturedTeacher = teacherArgumentCaptor.getValue();
+
         assertEquals("Bianca", capturedTeacher.getFirstName());
         assertEquals("1", capturedTeacher.getGroups().get(0).getName());
     }

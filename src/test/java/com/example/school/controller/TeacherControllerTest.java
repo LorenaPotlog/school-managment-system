@@ -43,18 +43,13 @@ class TeacherControllerTest {
 
     @BeforeEach
     public void setUp() {
-        Teacher teacher1 = Teacher.builder()
-                .firstName("Mihai")
-                .lastName("Popa")
-                .build();
-        Teacher teacher2 = Teacher.builder()
-                .firstName("Maria")
-                .lastName("Iorga")
-                .build();
+        Teacher teacher1 = Teacher.builder().firstName("Mihai").lastName("Popa").build();
+        Teacher teacher2 = Teacher.builder().firstName("Maria").lastName("Iorga").build();
+
         teacherRepository.saveAll(Arrays.asList(teacher1, teacher2));
-        Group group1 = Group.builder()
-                .name("1")
-                .build();
+
+        Group group1 = Group.builder().name("1").build();
+
         groupRepository.save(group1);
     }
 
@@ -80,7 +75,9 @@ class TeacherControllerTest {
                 .groupNames(List.of("1", "2"))
                 .schoolNames(List.of("1", "2"))
                 .build();
+
         ObjectMapper objectMapper = new ObjectMapper();
+
         mvc.perform(post("/teacher").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(addTeacherDto)))
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.firstName").value("Mihai"))
