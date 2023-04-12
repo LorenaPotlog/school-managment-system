@@ -2,6 +2,7 @@ package com.example.school.controller;
 
 import com.example.school.SchoolApplication;
 import com.example.school.dto.input.AddStudentDto;
+import com.example.school.dto.input.TransferStudentDto;
 import com.example.school.model.Group;
 import com.example.school.model.School;
 import com.example.school.model.Student;
@@ -86,35 +87,59 @@ class StudentControllerTest {
         AddStudentDto addStudentDto = AddStudentDto.builder()
                 .firstName("Bianca")
                 .lastName("Ionescu")
+                .groupName("I-A")
+                .schoolName("Sava")
                 .build();
 
         ObjectMapper objectMapper = new ObjectMapper();
 
         mvc.perform(post("/student").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(addStudentDto)))
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.firstName").value("Bianca"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content.firstName").value("Bianca"));
     }
 
     @Test
-    void shouldChangeClass() throws Exception {
-        mvc.perform(patch("/students/2/class/2"))
+    public void shouldDeleteStudentFromGroup() throws Exception {
+        mvc.perform(delete("/student/2/group/I-A"))
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.group.name").value("II-A"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$").value("Student was successfully deleted."));
+    }
+
+    @Test
+    public void shouldReturnHttpErrorWhenStudentNotFound() throws Exception {
+        mvc.perform(delete("/student/3/group/I-A"))
+                .andExpect(status().isNotFound())
+                .andExpect(MockMvcResultMatchers.jsonPath("$").value("Student not found"));
+    }
+
+    @Test
+    void shouldChangeGroup() throws Exception {
+        mvc.perform(patch("/student/2/group/2"))
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content.group.name").value("II-A"));
     }
 
     @Test
     void shouldChangeSchool() throws Exception {
-        mvc.perform(patch("/students/1/school/2"))
+        mvc.perform(patch("/student/1/school/2"))
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.school.name").value("Petru"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content.school.name").value("Petru"));
     }
 
     @Test
-    void shouldChangeSchoolAndClass() throws Exception {
-        mvc.perform(patch("/students/2/school/2/class/II-A"))
+    void shouldChangeSchoolAndGroup() throws Exception {
+        TransferStudentDto transferStudentDto = TransferStudentDto.builder()
+                .studentId(2L)
+                .schoolId(2L)
+                .groupName("II-A")
+                .build();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        mvc.perform(patch("/student").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(transferStudentDto)))
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.group.name").value("II-A"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.school.name").value("Petru"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content.group.name").value("II-A"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content.school.name").value("Petru"));
     }
 }
 

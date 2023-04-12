@@ -2,6 +2,7 @@ package com.example.school.service;
 
 import com.example.school.dto.StudentDto;
 import com.example.school.dto.input.AddStudentDto;
+import com.example.school.dto.input.TransferStudentDto;
 import com.example.school.model.Group;
 import com.example.school.model.School;
 import com.example.school.model.Student;
@@ -34,24 +35,52 @@ public class StudentService {
         return students;
     }
 
-    public StudentDto addStudent(AddStudentDto addStudentDto) {
+    public StudentDto add(AddStudentDto addStudentDto) {
         Student newStudent = Student.builder()
                 .firstName(addStudentDto.getFirstName())
                 .lastName(addStudentDto.getLastName())
                 .build();
+
         Optional<Group> group = groupRepository.findByName(addStudentDto.getGroupName());
         Optional<School> school = schoolRepository.findByName(addStudentDto.getSchoolName());
-        group.ifPresent(newStudent::setGroup);
-        school.ifPresent(newStudent::setSchool);
+
+        if (group.isEmpty()) {
+            throw new NotFoundException("Group not found.");
+        } else newStudent.setGroup(group.get());
+
+        if (school.isEmpty()) {
+            throw new NotFoundException("School not found.");
+        } else newStudent.setSchool(school.get());
+
         return StudentDto.toStudentDto(studentRepository.save(newStudent));
     }
 
-    public StudentDto changeClass(Long studentId, Long groupId) {
+    public void delete(String groupName, Long studentId) {
+        Group currentGroup = groupRepository.findByName(groupName)
+                .orElseThrow(() -> new NotFoundException("Group not found"));
+        Student existingStudent = studentRepository.findById(studentId)
+                .orElseThrow(() -> new NotFoundException("Student not found"));
+
+        boolean found = false;
+        for (Student student : currentGroup.getStudents()) {
+            if (existingStudent == student) {
+                studentRepository.delete(existingStudent);
+                found = true;
+            }
+        }
+        if (!found) {
+            throw new NotFoundException("Student not found in class.");
+        }
+    }
+
+    public StudentDto changeGroup(Long studentId, Long groupId) {
         Student existingStudent = studentRepository.findById(studentId)
                 .orElseThrow(() -> new NotFoundException("Student not found"));
         Group updatedGroup = groupRepository.findById(groupId)
-                .orElseThrow(() -> new NotFoundException("Class not found"));
+                .orElseThrow(() -> new NotFoundException("Group not found"));
+
         existingStudent.setGroup(updatedGroup);
+
         return StudentDto.toStudentDto(studentRepository.save(existingStudent));
     }
 
@@ -60,21 +89,26 @@ public class StudentService {
                 .orElseThrow(() -> new NotFoundException("Student not found"));
         School newSchool = schoolRepository.findById(schoolId)
                 .orElseThrow(() -> new NotFoundException("School not found"));
+
         transferredStudent.setGroup(null);
         transferredStudent.setSchool(newSchool);
+
         return StudentDto.toStudentDto(studentRepository.save(transferredStudent));
     }
 
-    public StudentDto changeSchoolAndClass(Long studentId, Long schoolId, String groupName) {
-        Student transferredStudent = studentRepository.findById(studentId)
+    public StudentDto changeSchoolAndGroup(TransferStudentDto transferStudentDto) {
+        Student transferredStudent = studentRepository.findById(transferStudentDto.getStudentId())
                 .orElseThrow(() -> new NotFoundException("Student not found"));
-        School newSchool = schoolRepository.findById(schoolId)
+        School newSchool = schoolRepository.findById(transferStudentDto.getSchoolId())
                 .orElseThrow(() -> new NotFoundException("School not found"));
+
         transferredStudent.setSchool(newSchool);
-        Group updatedGroup = groupRepository.findByName(groupName)
-                .orElseThrow(() -> new NotFoundException("Class not found"));
-        if (updatedGroup.getSchool() == newSchool) {
-            transferredStudent.setGroup(updatedGroup);
+
+        Group newGroup = groupRepository.findByName(transferStudentDto.getGroupName())
+                .orElseThrow(() -> new NotFoundException("Group not found"));
+
+        if (newGroup.getSchool() == newSchool) {
+            transferredStudent.setGroup(newGroup);
         } else {
             transferredStudent.setGroup(null);
         }

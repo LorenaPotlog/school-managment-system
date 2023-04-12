@@ -25,7 +25,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import java.util.Arrays;
 
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = SchoolApplication.class)
@@ -69,6 +70,15 @@ class GroupControllerTest {
     }
 
     @Test
+    void shouldReturnAllGroups() throws Exception {
+        mvc.perform(get("/groups"))
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$", hasSize(2)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.[0].name").value("I-A"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.[1].name").value("II-A"));
+    }
+
+    @Test
     public void shouldAddNewGroup() throws Exception {
         AddGroupDto addGroupDto = AddGroupDto.builder()
                 .groupName("I-A")
@@ -77,40 +87,19 @@ class GroupControllerTest {
 
         ObjectMapper objectMapper = new ObjectMapper();
 
-        mvc.perform(post("/class").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(addGroupDto)))
+        mvc.perform(post("/group").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(addGroupDto)))
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("I-A"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.school.name").value("Petru"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content.name").value("I-A"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content.school.name").value("Petru"));
     }
 
     @Test
-    public void shouldReturnAllStudentsInClass() throws Exception {
-        mvc.perform(get("/classes/I-A/students"))
+    public void shouldReturnAllStudentsInGroup() throws Exception {
+        mvc.perform(get("/groups/I-A/students"))
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$", hasSize(2)))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.[0].firstName").value("Bianca"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.[1].firstName").value("Ioana"));
-    }
-
-    @Test
-    public void shouldReturnEmptyListWhenNoStudentsInClass() throws Exception {
-        mvc.perform(get("/classes/II-A/students"))
-                .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.content().json("[]"));
-    }
-
-    @Test
-    public void shouldDeleteStudentFromClass() throws Exception {
-        mvc.perform(delete("/classes/I-A/students/2"))
-                .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$").value("Student was successfully deleted."));
-    }
-
-    @Test
-    public void shouldReturnHttpErrorWhenStudentNotFound() throws Exception {
-        mvc.perform(delete("/classes/I-A/students/3"))
-                .andExpect(status().isNotFound())
-                .andExpect(MockMvcResultMatchers.jsonPath("$").value("Student not found"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content", hasSize(2)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content.[0].firstName").value("Bianca"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content.[1].firstName").value("Ioana"));
     }
 }
 

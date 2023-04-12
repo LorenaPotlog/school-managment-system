@@ -1,12 +1,14 @@
 package com.example.school.service;
 
 import com.example.school.dto.input.AddStudentDto;
+import com.example.school.dto.input.TransferStudentDto;
 import com.example.school.model.Group;
 import com.example.school.model.School;
 import com.example.school.model.Student;
 import com.example.school.repository.GroupRepository;
 import com.example.school.repository.SchoolRepository;
 import com.example.school.repository.StudentRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,17 +39,27 @@ class StudentServiceTest {
 
     private Student student1;
     private Student student2;
+    private Student student3;
+
     private Group group;
     private School school;
+
+    private TransferStudentDto transferStudentDto;
 
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        student1 = Student.builder().id(3L).firstName("Bianca").lastName("Ionescu").build();
-        student2 = Student.builder().id(1L).firstName("Ioana").lastName("Popescu").build();
+        student1 = Student.builder().id(1L).firstName("Bianca").lastName("Ionescu").build();
+        student2 = Student.builder().id(2L).firstName("Ioana").lastName("Popescu").build();
+        student3 = Student.builder().id(3L).firstName("Mihai").build();
+
         group = Group.builder().id(1L).name("I-A").build();
-        school = School.builder().id(1L).build();
+        group.setStudents(List.of(student1, student2));
+
+        school = School.builder().id(1L).name("Sava").build();
+
+        transferStudentDto = TransferStudentDto.builder().studentId(1L).schoolId(1L).groupName("I-A").build();
     }
 
     @Test
@@ -67,9 +79,14 @@ class StudentServiceTest {
         AddStudentDto addStudentDto = AddStudentDto.builder()
                 .firstName("Bianca")
                 .lastName("Ionescu")
+                .groupName("I-A")
+                .schoolName("Sava")
                 .build();
 
-        studentService.addStudent(addStudentDto);
+        when(groupRepository.findByName("I-A")).thenReturn(Optional.of(group));
+        when(schoolRepository.findByName("Sava")).thenReturn(Optional.of(school));
+
+        studentService.add(addStudentDto);
 
         ArgumentCaptor<Student> studentArgumentCaptor = ArgumentCaptor.forClass(Student.class);
         verify(studentRepository).save(studentArgumentCaptor.capture());
@@ -79,11 +96,52 @@ class StudentServiceTest {
     }
 
     @Test
-    void shouldChangeClassInStudent() {
+    void shouldReturnErrorWhenGroupNotFound() {
+        AddStudentDto addStudentDto = AddStudentDto.builder()
+                .firstName("Bianca")
+                .lastName("Ionescu")
+                .groupName("I-A")
+                .schoolName("Sava")
+                .build();
+
+        when(schoolRepository.findByName("Sava")).thenReturn(Optional.of(school));
+
+        NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> studentService.add(addStudentDto));
+        assertEquals("Group not found.", exception.getMessage());
+    }
+
+    @Test
+    public void shouldDeleteStudentFromGivenClass() {
+        when(groupRepository.findByName("I-A")).thenReturn(Optional.of(group));
+        when(studentRepository.findById(1L)).thenReturn(Optional.of(student1));
+        when(studentRepository.findById(2L)).thenReturn(Optional.of(student2));
+
+        studentService.delete("I-A", 1L);
+    }
+
+    @Test
+    public void shouldReturnErrorWhenStudentNotFoundInGroup() {
+        when(groupRepository.findByName("I-A")).thenReturn(Optional.of(group));
+        when(studentRepository.findById(3L)).thenReturn(Optional.of(student3));
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> studentService.delete("I-A", 3L));
+    }
+
+    @Test
+    public void shouldReturnErrorWhenStudentNotFound() {
+        when(groupRepository.findByName("I-A")).thenReturn(Optional.of(group));
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> studentService.delete("I-A", 1L));
+    }
+
+
+    @Test
+    void shouldChangeGroupInStudent() {
         when(studentRepository.findById(1L)).thenReturn(Optional.of(student2));
         when(groupRepository.findById(1L)).thenReturn(Optional.of(group));
 
-        studentService.changeClass(1L, 1L);
+        studentService.changeGroup(1L, 1L);
 
         Mockito.verify(studentRepository).save(student2);
     }
@@ -93,10 +151,10 @@ class StudentServiceTest {
         when(studentRepository.findById(1L)).thenReturn(Optional.of(student2));
 
         Exception exception = assertThrows(NotFoundException.class, () -> {
-            studentService.changeClass(1L, 2L);
+            studentService.changeGroup(1L, 2L);
         });
 
-        assertEquals(exception.getMessage(), "Class not found");
+        assertEquals(exception.getMessage(), "Group not found");
         assertNull(student2.getGroup());
     }
 
@@ -105,7 +163,7 @@ class StudentServiceTest {
         when(groupRepository.findById(1L)).thenReturn(Optional.of(group));
 
         Exception exception = assertThrows(NotFoundException.class, () -> {
-            studentService.changeClass(2L, 1L);
+            studentService.changeGroup(2L, 1L);
         });
 
         assertEquals(exception.getMessage(), "Student not found");
@@ -128,7 +186,6 @@ class StudentServiceTest {
         Exception exception = assertThrows(NotFoundException.class, () -> {
             studentService.changeSchool(1L, 2L);
         });
-
         assertEquals(exception.getMessage(), "School not found");
     }
 
@@ -139,7 +196,7 @@ class StudentServiceTest {
         when(groupRepository.findByName("I-A")).thenReturn(Optional.of(group));
         group.setSchool(school);
 
-        studentService.changeSchoolAndClass(1L, 1L, "I-A");
+        studentService.changeSchoolAndGroup(transferStudentDto);
 
         Mockito.verify(studentRepository).save(student2);
     }
@@ -150,7 +207,7 @@ class StudentServiceTest {
         when(schoolRepository.findById(1L)).thenReturn(Optional.of(school));
         when(groupRepository.findByName("I-A")).thenReturn(Optional.of(group));
 
-        studentService.changeSchoolAndClass(1L, 1L, "I-A");
+        studentService.changeSchoolAndGroup(transferStudentDto);
 
         assertNull(student2.getGroup());
     }

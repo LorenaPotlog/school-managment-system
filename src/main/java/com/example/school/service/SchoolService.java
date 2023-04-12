@@ -25,17 +25,6 @@ public class SchoolService {
     @Autowired
     private TeacherRepository teacherRepository;
 
-    public SchoolDto addSchool(AddSchoolDto addSchoolDto) {
-        School newSchool = School.builder()
-                .name(addSchoolDto.getSchoolName())
-                .build();
-        for (int i = 0; i < addSchoolDto.getTeacherIds().size(); i++) {
-            Optional<Teacher> teacher = teacherRepository.findById(addSchoolDto.getTeacherIds().get(i));
-            teacher.ifPresent(value -> newSchool.addTeacher(teacher.get()));
-        }
-        return SchoolDto.toSchoolDto(schoolRepository.save(newSchool));
-    }
-
     public List<SchoolDto> getAll() {
         List<SchoolDto> schools = new ArrayList<>();
         for (School school : schoolRepository.findAll()) {
@@ -44,10 +33,25 @@ public class SchoolService {
         return schools;
     }
 
-    public List<GroupDto> getClasses(String schoolName) {
+    public SchoolDto add(AddSchoolDto addSchoolDto) {
+        School newSchool = School.builder()
+                .name(addSchoolDto.getSchoolName())
+                .build();
+
+        for (int i = 0; i < addSchoolDto.getTeacherIds().size(); i++) {
+            Optional<Teacher> teacher = teacherRepository.findById(addSchoolDto.getTeacherIds().get(i));
+            if (teacher.isEmpty()) {
+                throw new NotFoundException("Teacher not found.");
+            }
+            newSchool.addTeacher(teacher.get());
+        }
+        return SchoolDto.toSchoolDto(schoolRepository.save(newSchool));
+    }
+
+    public List<GroupDto> getGroups(String schoolName) {
         if (schoolRepository.findByName(schoolName).isPresent()) {
-            List<Group> classes = schoolRepository.findByName(schoolName).get().getGroups();
-            return classes.stream()
+            List<Group> groups = schoolRepository.findByName(schoolName).get().getGroups();
+            return groups.stream()
                     .map(GroupDto::toGroupDto)
                     .collect(Collectors.toList());
         } else throw new NotFoundException("School not found.");

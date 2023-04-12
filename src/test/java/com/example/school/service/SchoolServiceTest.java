@@ -6,6 +6,7 @@ import com.example.school.model.School;
 import com.example.school.model.Teacher;
 import com.example.school.repository.SchoolRepository;
 import com.example.school.repository.TeacherRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,12 +16,14 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.webjars.NotFoundException;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -44,7 +47,6 @@ class SchoolServiceTest {
 
         school1 = School.builder().name("A").build();
         school2 = School.builder().name("B").build();
-        teacher1 = Teacher.builder().firstName("Andrei").build();
 
         Group group1 = Group.builder().name("I-A").school(school1).build();
         Group group2 = Group.builder().name("II-A").school(school1).build();
@@ -53,17 +55,19 @@ class SchoolServiceTest {
         groups.add(group2);
 
         school1.setGroups(groups);
+
+        teacher1 = Teacher.builder().firstName("Andrei").build();
     }
 
     @Test
     void shouldAddNewSchool() {
         AddSchoolDto addSchoolDto = AddSchoolDto.builder()
                 .schoolName("Sava")
-                .teacherIds(List.of(1L, 2L, 3L))
+                .teacherIds(List.of(1L))
                 .build();
         when(teacherRepository.findById(1L)).thenReturn(Optional.of(teacher1));
 
-        schoolService.addSchool(addSchoolDto);
+        schoolService.add(addSchoolDto);
 
         ArgumentCaptor<School> schoolArgumentCaptor = ArgumentCaptor.forClass(School.class);
         verify(schoolRepository).save(schoolArgumentCaptor.capture());
@@ -72,6 +76,17 @@ class SchoolServiceTest {
         assertEquals("Sava", capturedSchool.getName());
         assertEquals("Andrei", capturedSchool.getTeachers().get(0).getFirstName());
 
+    }
+
+    @Test
+    void shouldReturnErrorWhenTeacherNotFound() {
+        AddSchoolDto addSchoolDto = AddSchoolDto.builder()
+                .schoolName("Sava")
+                .teacherIds(List.of(1L))
+                .build();
+
+        assertThrows(NotFoundException.class,
+                () -> schoolService.add(addSchoolDto));
     }
 
     @Test
@@ -89,7 +104,13 @@ class SchoolServiceTest {
     void shouldReturnAllClassesFromGivenSchool() {
         when(schoolRepository.findByName("A")).thenReturn(Optional.of(school1));
 
-        assertEquals(2, schoolService.getClasses("A").size());
-        assertEquals("II-A", schoolService.getClasses("A").get(1).getName());
+        assertEquals(2, schoolService.getGroups("A").size());
+        assertEquals("II-A", schoolService.getGroups("A").get(1).getName());
+    }
+
+    @Test
+    void shouldReturnErrorWhenSchoolNotFound() {
+        Assertions.assertThrows(NotFoundException.class,
+                () -> schoolService.getGroups("Sava"));
     }
 }

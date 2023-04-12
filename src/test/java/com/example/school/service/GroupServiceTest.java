@@ -6,7 +6,6 @@ import com.example.school.model.School;
 import com.example.school.model.Student;
 import com.example.school.repository.GroupRepository;
 import com.example.school.repository.SchoolRepository;
-import com.example.school.repository.StudentRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,12 +16,14 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.webjars.NotFoundException;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -34,30 +35,40 @@ class GroupServiceTest {
     @Mock
     GroupRepository groupRepository;
     @Mock
-    StudentRepository studentRepository;
-    @Mock
     SchoolRepository schoolRepository;
-
-    private Group group;
-    private Student student1;
-    private Student student2;
-    private Student student3;
+    private Group group1;
+    private Group group2;
     private School school;
+
+    private List<Group> groups;
 
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        group = Group.builder().id(1L).name("I-A").build();
-        student1 = Student.builder().id(1L).firstName("Ioana").build();
-        student2 = Student.builder().id(2L).firstName("Livia").build();
-        student3 = Student.builder().id(3L).firstName("Mihai").build();
+        group1 = Group.builder().id(1L).name("I-A").build();
+        group2 = Group.builder().id(2L).name("II-A").build();
+
+        groups = new ArrayList<>();
+        groups.add(group1);
+        groups.add(group2);
+
+        Student student1 = Student.builder().id(1L).firstName("Ioana").build();
+        Student student2 = Student.builder().id(2L).firstName("Livia").build();
         List<Student> students = new ArrayList<>();
         students.add(student1);
         students.add(student2);
 
+        group1.setStudents(students);
+
         school = School.builder().name("Petru").build();
-        group.setStudents(students);
+    }
+
+    @Test
+    void shouldReturnAllGroups() {
+        when(groupRepository.findAll()).thenReturn(groups);
+
+        assertEquals(2, groupService.getAll().size());
     }
 
     @Test
@@ -68,7 +79,7 @@ class GroupServiceTest {
                 .build();
         when(schoolRepository.findByName("Petru")).thenReturn(Optional.of(school));
 
-        groupService.addGroup(addGroupDto);
+        groupService.add(addGroupDto);
 
         ArgumentCaptor<Group> groupArgumentCaptor = ArgumentCaptor.forClass(Group.class);
         verify(groupRepository).save(groupArgumentCaptor.capture());
@@ -78,41 +89,29 @@ class GroupServiceTest {
     }
 
     @Test
-    public void shouldReturnStudentsWithinGivenClass() {
-        when(groupRepository.findByName("I-A")).thenReturn(Optional.of(group));
+    void shouldReturnErrorWhenSchoolNotFound() {
+        AddGroupDto addGroupDto = AddGroupDto.builder()
+                .groupName("I-A")
+                .schoolName("Petru")
+                .build();
+
+        assertThrows(NotFoundException.class,
+                () -> groupService.add(addGroupDto));
+    }
+
+    @Test
+    public void shouldReturnStudentsWithinGivenGroup() {
+        when(groupRepository.findByName("I-A")).thenReturn(Optional.of(group1));
 
         Assertions.assertFalse(groupService.getStudents("I-A").isEmpty());
         Assertions.assertEquals(2, groupService.getStudents("I-A").size());
         Assertions.assertEquals("Ioana", groupService.getStudents("I-A").get(0).getFirstName());
     }
-    @Test
-    public void shouldDeleteStudentFromGivenClass() {
-        when(groupRepository.findByName("I-A")).thenReturn(Optional.of(group));
-        when(studentRepository.findById(1L)).thenReturn(Optional.of(student1));
-        when(studentRepository.findById(2L)).thenReturn(Optional.of(student2));
-
-        groupService.deleteStudent("I-A", 1L);
-    }
 
     @Test
-    public void shouldReturnErrorWhenStudentNotFoundInClass() {
-        when(groupRepository.findByName("I-A")).thenReturn(Optional.of(group));
-        when(studentRepository.findById(3L)).thenReturn(Optional.of(student3));
-
-        Assertions.assertThrows(IllegalArgumentException.class, () -> groupService.deleteStudent("I-A", 3L));
-    }
-
-    @Test
-    public void shouldReturnErrorWhenStudentNotFound() {
-        when(groupRepository.findByName("I-A")).thenReturn(Optional.of(group));
-
-        Assertions.assertThrows(IllegalArgumentException.class, () -> groupService.deleteStudent("I-A", 1L));
-    }
-
-    @Test
-    public void shouldReturnErrorWhenClassNotFoundInClass() {
-        when(studentRepository.findById(3L)).thenReturn(Optional.of(student3));
-
-        Assertions.assertThrows(IllegalArgumentException.class, () -> groupService.deleteStudent("II-A", 3L));
+    void shouldReturnErrorWhenGroupNotFound() {
+        NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> groupService.getStudents("III-A"));
+        assertEquals("Group not found.", exception.getMessage());
     }
 }

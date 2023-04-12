@@ -66,21 +66,6 @@ class SchoolControllerTest {
     }
 
     @Test
-    void shouldAddNewSchool() throws Exception {
-        AddSchoolDto addSchoolDto = AddSchoolDto.builder()
-                .schoolName("Sava")
-                .teacherIds(List.of(1L, 2L, 3L))
-                .build();
-
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        mvc.perform(post("/school").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(addSchoolDto)))
-                .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.teachers.[0].firstName").value("Ioana"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Sava"));
-    }
-
-    @Test
     void shouldReturnAllSchools() throws Exception {
         mvc.perform(get("/schools"))
                 .andExpect(status().isOk())
@@ -90,18 +75,25 @@ class SchoolControllerTest {
     }
 
     @Test
-    void shouldReturnAllClassesInSchool() throws Exception {
-        mvc.perform(get("/schools/A/classes"))
+    void shouldAddNewSchool() throws Exception {
+        AddSchoolDto addSchoolDto = AddSchoolDto.builder()
+                .schoolName("Sava")
+                .teacherIds(List.of(1L))
+                .build();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        mvc.perform(post("/school").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(addSchoolDto)))
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$", hasSize(3)))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.[0].name").value("I-A"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content.name").value("Sava"));
     }
 
     @Test
-    void shouldReturnAllClassesInSchool2() throws Exception {
-        mvc.perform(get("/schools/B/classes"))
+    void shouldReturnAllClassesInSchool() throws Exception {
+        mvc.perform(get("/school/A/groups"))
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$", hasSize(0)));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content", hasSize(3)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content.[0].name").value("I-A"));
     }
 
 }

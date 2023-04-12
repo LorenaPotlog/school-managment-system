@@ -10,6 +10,7 @@ import com.example.school.repository.SchoolRepository;
 import com.example.school.repository.TeacherRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.webjars.NotFoundException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,19 +35,26 @@ public class TeacherService {
         return teachers;
     }
 
-    public TeacherDto addTeacher(AddTeacherDto addTeacherDto) {
+    public TeacherDto add(AddTeacherDto addTeacherDto) {
         Teacher newTeacher = Teacher.builder()
                 .firstName(addTeacherDto.getFirstName())
                 .lastName(addTeacherDto.getLastName())
                 .build();
+
         for (int i = 0; i < addTeacherDto.getGroupNames().size(); i++) {
             Optional<Group> group = groupRepository.findByName(addTeacherDto.getGroupNames().get(i));
-            group.ifPresent(value -> newTeacher.addGroup(group.get()));
+            if (group.isEmpty()) {
+                throw new NotFoundException("Group not found.");
+            } else newTeacher.addGroup(group.get());
         }
-        for (int i = 0; i < addTeacherDto.getGroupNames().size(); i++) {
+
+        for (int i = 0; i < addTeacherDto.getSchoolNames().size(); i++) {
             Optional<School> school = schoolRepository.findByName(addTeacherDto.getSchoolNames().get(i));
-            school.ifPresent(value -> newTeacher.addSchool(school.get()));
+            if (school.isEmpty()) {
+                throw new NotFoundException("School not found.");
+            } else newTeacher.addSchool(school.get());
         }
+
         return TeacherDto.toTeacherDto(teacherRepository.save(newTeacher));
     }
 }

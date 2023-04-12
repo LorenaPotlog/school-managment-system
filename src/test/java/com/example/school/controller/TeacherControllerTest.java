@@ -3,8 +3,10 @@ package com.example.school.controller;
 import com.example.school.SchoolApplication;
 import com.example.school.dto.input.AddTeacherDto;
 import com.example.school.model.Group;
+import com.example.school.model.School;
 import com.example.school.model.Teacher;
 import com.example.school.repository.GroupRepository;
+import com.example.school.repository.SchoolRepository;
 import com.example.school.repository.TeacherRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
@@ -40,6 +42,8 @@ class TeacherControllerTest {
     private TeacherRepository teacherRepository;
     @Autowired
     private GroupRepository groupRepository;
+    @Autowired
+    private SchoolRepository schoolRepository;
 
     @BeforeEach
     public void setUp() {
@@ -49,8 +53,10 @@ class TeacherControllerTest {
         teacherRepository.saveAll(Arrays.asList(teacher1, teacher2));
 
         Group group1 = Group.builder().name("1").build();
-
         groupRepository.save(group1);
+
+        School school1 = School.builder().name("1").build();
+        schoolRepository.save(school1);
     }
 
     @AfterEach
@@ -72,15 +78,15 @@ class TeacherControllerTest {
         AddTeacherDto addTeacherDto = AddTeacherDto.builder()
                 .firstName("Mihai")
                 .lastName("Popa")
-                .groupNames(List.of("1", "2"))
-                .schoolNames(List.of("1", "2"))
+                .groupNames(List.of("1"))
+                .schoolNames(List.of("1"))
                 .build();
 
         ObjectMapper objectMapper = new ObjectMapper();
 
         mvc.perform(post("/teacher").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(addTeacherDto)))
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.firstName").value("Mihai"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.groups.[0].name").value("1"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content.firstName").value("Mihai"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content.groups.[0].name").value("1"));
     }
 }

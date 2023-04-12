@@ -14,13 +14,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.webjars.NotFoundException;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -61,15 +61,15 @@ class TeacherServiceTest {
         AddTeacherDto addTeacherDto = AddTeacherDto.builder()
                 .firstName("Bianca")
                 .lastName("Popescu")
-                .groupNames(List.of("1", "2"))
-                .schoolNames(List.of("1", "2"))
+                .groupNames(List.of("1"))
+                .schoolNames(List.of("1"))
                 .build();
         Group group1 = Group.builder().name("1").build();
         School school1 = School.builder().name("1").build();
         when(groupRepository.findByName("1")).thenReturn(Optional.of(group1));
         when(schoolRepository.findByName("1")).thenReturn(Optional.of(school1));
 
-        teacherService.addTeacher(addTeacherDto);
+        teacherService.add(addTeacherDto);
 
         ArgumentCaptor<Teacher> teacherArgumentCaptor = ArgumentCaptor.forClass(Teacher.class);
         verify(teacherRepository).save(teacherArgumentCaptor.capture());
@@ -77,5 +77,18 @@ class TeacherServiceTest {
 
         assertEquals("Bianca", capturedTeacher.getFirstName());
         assertEquals("1", capturedTeacher.getGroups().get(0).getName());
+    }
+
+    @Test
+    void shouldReturnErrorWhenGroupNotFound() {
+        AddTeacherDto addTeacherDto = AddTeacherDto.builder()
+                .firstName("Bianca")
+                .lastName("Popescu")
+                .groupNames(List.of("12"))
+                .schoolNames(null)
+                .build();
+
+        assertThrows(NotFoundException.class,
+                () -> teacherService.add(addTeacherDto));
     }
 }

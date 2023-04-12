@@ -8,9 +8,9 @@ import com.example.school.model.School;
 import com.example.school.model.Student;
 import com.example.school.repository.GroupRepository;
 import com.example.school.repository.SchoolRepository;
-import com.example.school.repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.webjars.NotFoundException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,46 +22,38 @@ public class GroupService {
     @Autowired
     private GroupRepository groupRepository;
     @Autowired
-    private StudentRepository studentRepository;
-    @Autowired
     private SchoolRepository schoolRepository;
 
-    public GroupDto addGroup(AddGroupDto addGroupDto) {
+    public List<GroupDto> getAll() {
+        List<GroupDto> groups = new ArrayList<>();
+        for (Group group : groupRepository.findAll()) {
+            groups.add(GroupDto.toGroupDto(group));
+        }
+        return groups;
+    }
+
+    public GroupDto add(AddGroupDto addGroupDto) {
         Group newGroup = Group.builder()
                 .name(addGroupDto.getGroupName())
                 .build();
+
         Optional<School> school = schoolRepository.findByName(addGroupDto.getSchoolName());
-        school.ifPresent(newGroup::setSchool);
+        if (school.isEmpty()) {
+            throw new NotFoundException("School not found.");
+        } else newGroup.setSchool(school.get());
+
         return GroupDto.toGroupDto(groupRepository.save(newGroup));
     }
 
-    public List<StudentDto> getStudents(String className) {
+    public List<StudentDto> getStudents(String groupName) {
         List<StudentDto> students = new ArrayList<>();
-        for (Student student : groupRepository.findByName(className).get().getStudents()) {
+        Optional<Group> group = groupRepository.findByName(groupName);
+        if (group.isEmpty()) {
+            throw new NotFoundException("Group not found.");
+        }
+        for (Student student : group.get().getStudents()) {
             students.add(StudentDto.toStudentDto(student));
         }
         return students;
-    }
-
-    public void deleteStudent(String className, Long studentId) {
-        Optional<Group> currentClass = groupRepository.findByName(className);
-        Optional<Student> existingStudent = studentRepository.findById(studentId);
-        if (existingStudent.isEmpty()) {
-            throw new IllegalArgumentException("Student not found");
-        }
-
-        if (currentClass.isEmpty()) {
-            throw new IllegalArgumentException("Class not found.");
-        }
-        boolean found = false;
-        for (Student student : currentClass.get().getStudents()) {
-            if (existingStudent.get() == student) {
-                studentRepository.delete(existingStudent.get());
-                found = true;
-            }
-        }
-        if (!found) {
-            throw new IllegalArgumentException("Student not found in class.");
-        }
     }
 }
